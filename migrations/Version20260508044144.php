@@ -1,0 +1,251 @@
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+/**
+ * Auto-generated Migration: Please modify to your needs!
+ */
+final class Version20260508044144 extends AbstractMigration
+{
+    public function getDescription(): string
+    {
+        return '';
+    }
+
+    public function up(Schema $schema): void
+    {
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE bank_transaction (id INT AUTO_INCREMENT NOT NULL, reference_id VARCHAR(255) NOT NULL, transaction_date DATETIME NOT NULL, description VARCHAR(255) NOT NULL, amount NUMERIC(10, 2) NOT NULL, type VARCHAR(255) NOT NULL, matched_record VARCHAR(255) DEFAULT NULL, confidence_score INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('ALTER TABLE student DROP FOREIGN KEY FK_STUDENT_PARENT');
+        $this->addSql('DROP TABLE student');
+        $this->addSql('ALTER TABLE audit_log DROP FOREIGN KEY FK_F6E1C0F5A76ED395');
+        $this->addSql('DROP INDEX idx_user ON audit_log');
+        $this->addSql('CREATE INDEX IDX_F6E1C0F5A76ED395 ON audit_log (user_id)');
+        $this->addSql('ALTER TABLE audit_log ADD CONSTRAINT FK_F6E1C0F5A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE expense DROP FOREIGN KEY FK_EXPENSE_TEACHER');
+        $this->addSql('ALTER TABLE expense CHANGE category category VARCHAR(255) NOT NULL, CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('DROP INDEX fk_expense_teacher ON expense');
+        $this->addSql('CREATE INDEX IDX_2D3A8DA641807E1D ON expense (teacher_id)');
+        $this->addSql('ALTER TABLE expense ADD CONSTRAINT FK_EXPENSE_TEACHER FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE expense_category CHANGE description description LONGTEXT DEFAULT NULL, CHANGE is_recurring is_recurring TINYINT(1) NOT NULL, CHANGE is_active is_active TINYINT(1) NOT NULL');
+        $this->addSql('ALTER TABLE expense_claim DROP FOREIGN KEY fk_expense_claim_teacher');
+        $this->addSql('ALTER TABLE expense_claim DROP FOREIGN KEY fk_expense_claim_teacher');
+        $this->addSql('ALTER TABLE expense_claim CHANGE teacher_id teacher_id INT DEFAULT NULL, CHANGE category category VARCHAR(255) NOT NULL, CHANGE description description LONGTEXT NOT NULL, CHANGE status status VARCHAR(50) NOT NULL, CHANGE submitted_at submitted_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE expense_claim ADD CONSTRAINT FK_461791D41807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('DROP INDEX fk_expense_claim_teacher ON expense_claim');
+        $this->addSql('CREATE INDEX IDX_461791D41807E1D ON expense_claim (teacher_id)');
+        $this->addSql('ALTER TABLE expense_claim ADD CONSTRAINT fk_expense_claim_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE fee_category CHANGE description description LONGTEXT DEFAULT NULL, CHANGE is_active is_active TINYINT(1) NOT NULL');
+        $this->addSql('ALTER TABLE fee_invoice DROP FOREIGN KEY FK_FEE_INVOICE_STUDENT');
+        $this->addSql('ALTER TABLE fee_invoice DROP FOREIGN KEY FK_FEE_INVOICE_CATEGORY');
+        $this->addSql('DROP INDEX idx_fee_invoice_student ON fee_invoice');
+        $this->addSql('CREATE INDEX IDX_73D3CF18CB944F1A ON fee_invoice (student_id)');
+        $this->addSql('DROP INDEX idx_fee_invoice_category ON fee_invoice');
+        $this->addSql('CREATE INDEX IDX_73D3CF189B9BF38C ON fee_invoice (fee_category_id)');
+        $this->addSql('ALTER TABLE fee_invoice ADD CONSTRAINT FK_FEE_INVOICE_STUDENT FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('ALTER TABLE fee_invoice ADD CONSTRAINT FK_FEE_INVOICE_CATEGORY FOREIGN KEY (fee_category_id) REFERENCES fee_category (id)');
+        $this->addSql('ALTER TABLE fee_payment DROP FOREIGN KEY FK_PAYMENT_STUDENT');
+        $this->addSql('ALTER TABLE fee_payment DROP FOREIGN KEY FK_PAYMENT_STUDENT');
+        $this->addSql('ALTER TABLE fee_payment CHANGE method method VARCHAR(255) NOT NULL, CHANGE paid_at paid_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE fee_payment ADD CONSTRAINT FK_8E9E5C51CB944F1A FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('DROP INDEX idx_payment_student ON fee_payment');
+        $this->addSql('CREATE INDEX IDX_8E9E5C51CB944F1A ON fee_payment (student_id)');
+        $this->addSql('ALTER TABLE fee_payment ADD CONSTRAINT FK_PAYMENT_STUDENT FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE fee_structure DROP FOREIGN KEY fk_fee_academic_year');
+        $this->addSql('ALTER TABLE fee_structure DROP FOREIGN KEY fk_fee_academic_year');
+        $this->addSql('ALTER TABLE fee_structure ADD fee_category VARCHAR(255) NOT NULL, CHANGE is_active is_active TINYINT(1) NOT NULL, CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE fee_structure ADD CONSTRAINT FK_F1079CE2C54F3401 FOREIGN KEY (academic_year_id) REFERENCES academic_year (id)');
+        $this->addSql('DROP INDEX idx_academic_year ON fee_structure');
+        $this->addSql('CREATE INDEX IDX_F1079CE2C54F3401 ON fee_structure (academic_year_id)');
+        $this->addSql('ALTER TABLE fee_structure ADD CONSTRAINT fk_fee_academic_year FOREIGN KEY (academic_year_id) REFERENCES academic_year (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE petty_cash DROP FOREIGN KEY fk_petty_cash_teacher');
+        $this->addSql('ALTER TABLE petty_cash DROP FOREIGN KEY fk_petty_cash_teacher');
+        $this->addSql('ALTER TABLE petty_cash CHANGE teacher_id teacher_id INT DEFAULT NULL, CHANGE source_event source_event VARCHAR(255) NOT NULL, CHANGE description description LONGTEXT DEFAULT NULL, CHANGE status status VARCHAR(50) NOT NULL, CHANGE collected_at collected_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE petty_cash ADD CONSTRAINT FK_82997CE141807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('DROP INDEX fk_petty_cash_teacher ON petty_cash');
+        $this->addSql('CREATE INDEX IDX_82997CE141807E1D ON petty_cash (teacher_id)');
+        $this->addSql('ALTER TABLE petty_cash ADD CONSTRAINT fk_petty_cash_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE salary_slip DROP FOREIGN KEY fk_salary_slip_teacher');
+        $this->addSql('ALTER TABLE salary_slip DROP FOREIGN KEY fk_salary_slip_teacher');
+        $this->addSql('ALTER TABLE salary_slip CHANGE teacher_id teacher_id INT DEFAULT NULL, CHANGE month month VARCHAR(100) NOT NULL, CHANGE status status VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE salary_slip ADD CONSTRAINT FK_A590613041807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('DROP INDEX fk_salary_slip_teacher ON salary_slip');
+        $this->addSql('CREATE INDEX IDX_A590613041807E1D ON salary_slip (teacher_id)');
+        $this->addSql('ALTER TABLE salary_slip ADD CONSTRAINT fk_salary_slip_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE school CHANGE address address LONGTEXT NOT NULL, CHANGE phone phone VARCHAR(20) NOT NULL, CHANGE email email VARCHAR(150) NOT NULL, CHANGE currency currency VARCHAR(1) NOT NULL, CHANGE is_active is_active TINYINT(1) NOT NULL, CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('ALTER TABLE school_class CHANGE name name VARCHAR(255) NOT NULL, CHANGE is_active is_active TINYINT(1) NOT NULL');
+        $this->addSql('ALTER TABLE section DROP FOREIGN KEY FK_SECTION_CLASS');
+        $this->addSql('ALTER TABLE section DROP FOREIGN KEY FK_SECTION_CLASS');
+        $this->addSql('ALTER TABLE section DROP academic_class_id');
+        $this->addSql('ALTER TABLE section ADD CONSTRAINT FK_2D737AEFEA000B10 FOREIGN KEY (class_id) REFERENCES academic_class (id)');
+        $this->addSql('DROP INDEX idx_2d737aef8255fb5 ON section');
+        $this->addSql('CREATE INDEX IDX_2D737AEFEA000B10 ON section (class_id)');
+        $this->addSql('ALTER TABLE section ADD CONSTRAINT FK_SECTION_CLASS FOREIGN KEY (class_id) REFERENCES academic_class (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_STUDENT');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_DISCOUNT');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_STUDENT');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_DISCOUNT');
+        $this->addSql('ALTER TABLE student_discount CHANGE student_id student_id INT DEFAULT NULL, CHANGE discount_id discount_id INT DEFAULT NULL, CHANGE assigned_at assigned_at DATETIME NOT NULL, CHANGE status status VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_526BF895CB944F1A FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_526BF8954C7C611F FOREIGN KEY (discount_id) REFERENCES fee_discount (id)');
+        $this->addSql('DROP INDEX idx_student ON student_discount');
+        $this->addSql('CREATE INDEX IDX_526BF895CB944F1A ON student_discount (student_id)');
+        $this->addSql('DROP INDEX idx_discount ON student_discount');
+        $this->addSql('CREATE INDEX IDX_526BF8954C7C611F ON student_discount (discount_id)');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_STUDENT FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_DISCOUNT FOREIGN KEY (discount_id) REFERENCES fee_discount (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_CLASS_RELATION');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_CLASS_RELATION');
+        $this->addSql('ALTER TABLE students DROP class_id, CHANGE status status VARCHAR(20) NOT NULL');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_A4698DB2D5308307 FOREIGN KEY (academic_class_id) REFERENCES academic_class (id)');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_A4698DB2D823E37A FOREIGN KEY (section_id) REFERENCES section (id)');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_A4698DB2D526A7D3 FOREIGN KEY (parent_user_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('CREATE INDEX IDX_A4698DB2D823E37A ON students (section_id)');
+        $this->addSql('CREATE INDEX IDX_A4698DB2D526A7D3 ON students (parent_user_id)');
+        $this->addSql('DROP INDEX uniq_b723af33fd3f9c56 ON students');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_A4698DB2AD5A8A1B ON students (admission_no)');
+        $this->addSql('DROP INDEX fk_class_relation ON students');
+        $this->addSql('CREATE INDEX IDX_A4698DB2D5308307 ON students (academic_class_id)');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_CLASS_RELATION FOREIGN KEY (academic_class_id) REFERENCES academic_class (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE subject DROP FOREIGN KEY FK_SUBJECT_CLASS');
+        $this->addSql('ALTER TABLE subject DROP FOREIGN KEY FK_SUBJECT_CLASS');
+        $this->addSql('ALTER TABLE subject CHANGE subject_code subject_code VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE subject ADD CONSTRAINT FK_FBCE3E7AD5308307 FOREIGN KEY (academic_class_id) REFERENCES academic_class (id)');
+        $this->addSql('DROP INDEX fk_subject_class ON subject');
+        $this->addSql('CREATE INDEX IDX_FBCE3E7AD5308307 ON subject (academic_class_id)');
+        $this->addSql('ALTER TABLE subject ADD CONSTRAINT FK_SUBJECT_CLASS FOREIGN KEY (academic_class_id) REFERENCES academic_class (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE syllabus DROP FOREIGN KEY FK_SYLLABUS_SUBJECT');
+        $this->addSql('ALTER TABLE syllabus DROP FOREIGN KEY FK_SYLLABUS_SUBJECT');
+        $this->addSql('ALTER TABLE syllabus CHANGE chapter_name chapter_name VARCHAR(100) NOT NULL, CHANGE description description VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE syllabus ADD CONSTRAINT FK_4E74AB9223EDC87 FOREIGN KEY (subject_id) REFERENCES subject (id)');
+        $this->addSql('DROP INDEX fk_syllabus_subject ON syllabus');
+        $this->addSql('CREATE INDEX IDX_4E74AB9223EDC87 ON syllabus (subject_id)');
+        $this->addSql('ALTER TABLE syllabus ADD CONSTRAINT FK_SYLLABUS_SUBJECT FOREIGN KEY (subject_id) REFERENCES subject (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE system_settings CHANGE tax_percentage tax_percentage DOUBLE PRECISION NOT NULL, CHANGE receipt_prefix receipt_prefix VARCHAR(255) NOT NULL, CHANGE logo logo VARCHAR(20) NOT NULL, CHANGE address address LONGTEXT DEFAULT NULL');
+        $this->addSql('DROP INDEX staff_id ON teacher');
+        $this->addSql('ALTER TABLE teacher CHANGE first_name first_name VARCHAR(100) NOT NULL, CHANGE last_name last_name VARCHAR(100) NOT NULL, CHANGE base_salary base_salary NUMERIC(10, 2) NOT NULL, CHANGE status status VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE user CHANGE created_at created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON user (email)');
+    }
+
+    public function down(Schema $schema): void
+    {
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('CREATE TABLE student (id INT AUTO_INCREMENT NOT NULL, parent_user_id INT DEFAULT NULL, name VARCHAR(255) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_general_ci`, admission_no VARCHAR(100) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_general_ci`, status VARCHAR(50) CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_general_ci`, created_at DATETIME NOT NULL, UNIQUE INDEX admission_no (admission_no), INDEX FK_STUDENT_PARENT (parent_user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_general_ci` ENGINE = InnoDB COMMENT = \'\' ');
+        $this->addSql('ALTER TABLE student ADD CONSTRAINT FK_STUDENT_PARENT FOREIGN KEY (parent_user_id) REFERENCES user (id) ON DELETE SET NULL');
+        $this->addSql('DROP TABLE bank_transaction');
+        $this->addSql('ALTER TABLE audit_log DROP FOREIGN KEY FK_F6E1C0F5A76ED395');
+        $this->addSql('DROP INDEX idx_f6e1c0f5a76ed395 ON audit_log');
+        $this->addSql('CREATE INDEX idx_user ON audit_log (user_id)');
+        $this->addSql('ALTER TABLE audit_log ADD CONSTRAINT FK_F6E1C0F5A76ED395 FOREIGN KEY (user_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE expense DROP FOREIGN KEY FK_2D3A8DA641807E1D');
+        $this->addSql('ALTER TABLE expense CHANGE category category VARCHAR(100) NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
+        $this->addSql('DROP INDEX idx_2d3a8da641807e1d ON expense');
+        $this->addSql('CREATE INDEX FK_EXPENSE_TEACHER ON expense (teacher_id)');
+        $this->addSql('ALTER TABLE expense ADD CONSTRAINT FK_2D3A8DA641807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE SET NULL');
+        $this->addSql('ALTER TABLE expense_category CHANGE description description TEXT DEFAULT NULL, CHANGE is_recurring is_recurring TINYINT(1) DEFAULT 0 NOT NULL, CHANGE is_active is_active TINYINT(1) DEFAULT 1 NOT NULL');
+        $this->addSql('ALTER TABLE expense_claim DROP FOREIGN KEY FK_461791D41807E1D');
+        $this->addSql('ALTER TABLE expense_claim DROP FOREIGN KEY FK_461791D41807E1D');
+        $this->addSql('ALTER TABLE expense_claim CHANGE teacher_id teacher_id INT NOT NULL, CHANGE category category VARCHAR(100) NOT NULL, CHANGE description description TEXT NOT NULL, CHANGE status status VARCHAR(50) DEFAULT \'Pending Review\', CHANGE submitted_at submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL');
+        $this->addSql('ALTER TABLE expense_claim ADD CONSTRAINT fk_expense_claim_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_461791d41807e1d ON expense_claim');
+        $this->addSql('CREATE INDEX fk_expense_claim_teacher ON expense_claim (teacher_id)');
+        $this->addSql('ALTER TABLE expense_claim ADD CONSTRAINT FK_461791D41807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('ALTER TABLE fee_category CHANGE description description TEXT DEFAULT NULL, CHANGE is_active is_active TINYINT(1) DEFAULT 1 NOT NULL');
+        $this->addSql('ALTER TABLE fee_invoice DROP FOREIGN KEY FK_73D3CF18CB944F1A');
+        $this->addSql('ALTER TABLE fee_invoice DROP FOREIGN KEY FK_73D3CF189B9BF38C');
+        $this->addSql('DROP INDEX idx_73d3cf18cb944f1a ON fee_invoice');
+        $this->addSql('CREATE INDEX IDX_FEE_INVOICE_STUDENT ON fee_invoice (student_id)');
+        $this->addSql('DROP INDEX idx_73d3cf189b9bf38c ON fee_invoice');
+        $this->addSql('CREATE INDEX IDX_FEE_INVOICE_CATEGORY ON fee_invoice (fee_category_id)');
+        $this->addSql('ALTER TABLE fee_invoice ADD CONSTRAINT FK_73D3CF18CB944F1A FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('ALTER TABLE fee_invoice ADD CONSTRAINT FK_73D3CF189B9BF38C FOREIGN KEY (fee_category_id) REFERENCES fee_category (id)');
+        $this->addSql('ALTER TABLE fee_payment DROP FOREIGN KEY FK_8E9E5C51CB944F1A');
+        $this->addSql('ALTER TABLE fee_payment DROP FOREIGN KEY FK_8E9E5C51CB944F1A');
+        $this->addSql('ALTER TABLE fee_payment CHANGE paid_at paid_at DATETIME NOT NULL, CHANGE method method VARCHAR(50) NOT NULL');
+        $this->addSql('ALTER TABLE fee_payment ADD CONSTRAINT FK_PAYMENT_STUDENT FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_8e9e5c51cb944f1a ON fee_payment');
+        $this->addSql('CREATE INDEX IDX_PAYMENT_STUDENT ON fee_payment (student_id)');
+        $this->addSql('ALTER TABLE fee_payment ADD CONSTRAINT FK_8E9E5C51CB944F1A FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('ALTER TABLE fee_structure DROP FOREIGN KEY FK_F1079CE2C54F3401');
+        $this->addSql('ALTER TABLE fee_structure DROP FOREIGN KEY FK_F1079CE2C54F3401');
+        $this->addSql('ALTER TABLE fee_structure DROP fee_category, CHANGE is_active is_active TINYINT(1) DEFAULT 1 NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE fee_structure ADD CONSTRAINT fk_fee_academic_year FOREIGN KEY (academic_year_id) REFERENCES academic_year (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_f1079ce2c54f3401 ON fee_structure');
+        $this->addSql('CREATE INDEX idx_academic_year ON fee_structure (academic_year_id)');
+        $this->addSql('ALTER TABLE fee_structure ADD CONSTRAINT FK_F1079CE2C54F3401 FOREIGN KEY (academic_year_id) REFERENCES academic_year (id)');
+        $this->addSql('ALTER TABLE petty_cash DROP FOREIGN KEY FK_82997CE141807E1D');
+        $this->addSql('ALTER TABLE petty_cash DROP FOREIGN KEY FK_82997CE141807E1D');
+        $this->addSql('ALTER TABLE petty_cash CHANGE teacher_id teacher_id INT NOT NULL, CHANGE source_event source_event VARCHAR(150) NOT NULL, CHANGE description description TEXT DEFAULT NULL, CHANGE status status VARCHAR(50) DEFAULT \'Unremitted\', CHANGE collected_at collected_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL');
+        $this->addSql('ALTER TABLE petty_cash ADD CONSTRAINT fk_petty_cash_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_82997ce141807e1d ON petty_cash');
+        $this->addSql('CREATE INDEX fk_petty_cash_teacher ON petty_cash (teacher_id)');
+        $this->addSql('ALTER TABLE petty_cash ADD CONSTRAINT FK_82997CE141807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('ALTER TABLE salary_slip DROP FOREIGN KEY FK_A590613041807E1D');
+        $this->addSql('ALTER TABLE salary_slip DROP FOREIGN KEY FK_A590613041807E1D');
+        $this->addSql('ALTER TABLE salary_slip CHANGE teacher_id teacher_id INT NOT NULL, CHANGE month month VARCHAR(50) NOT NULL, CHANGE status status VARCHAR(50) DEFAULT \'Processing\'');
+        $this->addSql('ALTER TABLE salary_slip ADD CONSTRAINT fk_salary_slip_teacher FOREIGN KEY (teacher_id) REFERENCES teacher (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_a590613041807e1d ON salary_slip');
+        $this->addSql('CREATE INDEX fk_salary_slip_teacher ON salary_slip (teacher_id)');
+        $this->addSql('ALTER TABLE salary_slip ADD CONSTRAINT FK_A590613041807E1D FOREIGN KEY (teacher_id) REFERENCES teacher (id)');
+        $this->addSql('ALTER TABLE school CHANGE address address TEXT NOT NULL, CHANGE phone phone VARCHAR(20) DEFAULT NULL, CHANGE email email VARCHAR(150) DEFAULT NULL, CHANGE currency currency VARCHAR(10) NOT NULL, CHANGE is_active is_active TINYINT(1) DEFAULT 1 NOT NULL, CHANGE created_at created_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE school_class CHANGE name name VARCHAR(50) NOT NULL, CHANGE is_active is_active TINYINT(1) DEFAULT 1 NOT NULL');
+        $this->addSql('ALTER TABLE section DROP FOREIGN KEY FK_2D737AEFEA000B10');
+        $this->addSql('ALTER TABLE section DROP FOREIGN KEY FK_2D737AEFEA000B10');
+        $this->addSql('ALTER TABLE section ADD academic_class_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE section ADD CONSTRAINT FK_SECTION_CLASS FOREIGN KEY (class_id) REFERENCES academic_class (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_2d737aefea000b10 ON section');
+        $this->addSql('CREATE INDEX IDX_2D737AEF8255FB5 ON section (class_id)');
+        $this->addSql('ALTER TABLE section ADD CONSTRAINT FK_2D737AEFEA000B10 FOREIGN KEY (class_id) REFERENCES academic_class (id)');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_A4698DB2D5308307');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_A4698DB2D823E37A');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_A4698DB2D526A7D3');
+        $this->addSql('DROP INDEX IDX_A4698DB2D823E37A ON students');
+        $this->addSql('DROP INDEX IDX_A4698DB2D526A7D3 ON students');
+        $this->addSql('ALTER TABLE students DROP FOREIGN KEY FK_A4698DB2D5308307');
+        $this->addSql('ALTER TABLE students ADD class_id INT DEFAULT NULL, CHANGE status status VARCHAR(20) DEFAULT \'active\' NOT NULL');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_CLASS_RELATION FOREIGN KEY (academic_class_id) REFERENCES academic_class (id) ON DELETE SET NULL');
+        $this->addSql('DROP INDEX uniq_a4698db2ad5a8a1b ON students');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_B723AF33FD3F9C56 ON students (admission_no)');
+        $this->addSql('DROP INDEX idx_a4698db2d5308307 ON students');
+        $this->addSql('CREATE INDEX FK_CLASS_RELATION ON students (academic_class_id)');
+        $this->addSql('ALTER TABLE students ADD CONSTRAINT FK_A4698DB2D5308307 FOREIGN KEY (academic_class_id) REFERENCES academic_class (id)');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_526BF895CB944F1A');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_526BF8954C7C611F');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_526BF895CB944F1A');
+        $this->addSql('ALTER TABLE student_discount DROP FOREIGN KEY FK_526BF8954C7C611F');
+        $this->addSql('ALTER TABLE student_discount CHANGE student_id student_id INT NOT NULL, CHANGE discount_id discount_id INT NOT NULL, CHANGE assigned_at assigned_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', CHANGE status status VARCHAR(20) DEFAULT \'Active\' NOT NULL');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_STUDENT FOREIGN KEY (student_id) REFERENCES students (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_DISCOUNT FOREIGN KEY (discount_id) REFERENCES fee_discount (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_526bf895cb944f1a ON student_discount');
+        $this->addSql('CREATE INDEX IDX_STUDENT ON student_discount (student_id)');
+        $this->addSql('DROP INDEX idx_526bf8954c7c611f ON student_discount');
+        $this->addSql('CREATE INDEX IDX_DISCOUNT ON student_discount (discount_id)');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_526BF895CB944F1A FOREIGN KEY (student_id) REFERENCES students (id)');
+        $this->addSql('ALTER TABLE student_discount ADD CONSTRAINT FK_526BF8954C7C611F FOREIGN KEY (discount_id) REFERENCES fee_discount (id)');
+        $this->addSql('ALTER TABLE subject DROP FOREIGN KEY FK_FBCE3E7AD5308307');
+        $this->addSql('ALTER TABLE subject DROP FOREIGN KEY FK_FBCE3E7AD5308307');
+        $this->addSql('ALTER TABLE subject CHANGE subject_code subject_code VARCHAR(50) DEFAULT NULL');
+        $this->addSql('ALTER TABLE subject ADD CONSTRAINT FK_SUBJECT_CLASS FOREIGN KEY (academic_class_id) REFERENCES academic_class (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_fbce3e7ad5308307 ON subject');
+        $this->addSql('CREATE INDEX FK_SUBJECT_CLASS ON subject (academic_class_id)');
+        $this->addSql('ALTER TABLE subject ADD CONSTRAINT FK_FBCE3E7AD5308307 FOREIGN KEY (academic_class_id) REFERENCES academic_class (id)');
+        $this->addSql('ALTER TABLE syllabus DROP FOREIGN KEY FK_4E74AB9223EDC87');
+        $this->addSql('ALTER TABLE syllabus DROP FOREIGN KEY FK_4E74AB9223EDC87');
+        $this->addSql('ALTER TABLE syllabus CHANGE chapter_name chapter_name VARCHAR(255) NOT NULL, CHANGE description description TEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE syllabus ADD CONSTRAINT FK_SYLLABUS_SUBJECT FOREIGN KEY (subject_id) REFERENCES subject (id) ON DELETE CASCADE');
+        $this->addSql('DROP INDEX idx_4e74ab9223edc87 ON syllabus');
+        $this->addSql('CREATE INDEX FK_SYLLABUS_SUBJECT ON syllabus (subject_id)');
+        $this->addSql('ALTER TABLE syllabus ADD CONSTRAINT FK_4E74AB9223EDC87 FOREIGN KEY (subject_id) REFERENCES subject (id)');
+        $this->addSql('ALTER TABLE system_settings CHANGE tax_percentage tax_percentage NUMERIC(5, 2) NOT NULL, CHANGE receipt_prefix receipt_prefix VARCHAR(20) NOT NULL, CHANGE logo logo VARCHAR(255) DEFAULT NULL, CHANGE address address TEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE teacher CHANGE first_name first_name VARCHAR(255) NOT NULL, CHANGE last_name last_name VARCHAR(255) NOT NULL, CHANGE base_salary base_salary NUMERIC(10, 2) DEFAULT \'0.00\' NOT NULL, CHANGE status status VARCHAR(20) DEFAULT \'active\'');
+        $this->addSql('CREATE UNIQUE INDEX staff_id ON teacher (staff_id)');
+        $this->addSql('DROP INDEX UNIQ_8D93D649E7927C74 ON user');
+        $this->addSql('ALTER TABLE user CHANGE created_at created_at DATETIME DEFAULT CURRENT_TIMESTAMP');
+    }
+}

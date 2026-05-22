@@ -1,0 +1,466 @@
+{% extends 'teacher/base.html.twig' %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+
+<style>
+
+    body{
+        background:#f4f7fb;
+    }
+
+    .dashboard-header{
+        background:#ffffff;
+        border-radius:18px;
+        padding:24px;
+        border:1px solid #e5e7eb;
+        margin-bottom:24px;
+    }
+
+    .dashboard-header h2{
+        font-weight:700;
+        color:#111827;
+        margin-bottom:4px;
+    }
+
+    .dashboard-header p{
+        color:#6b7280;
+        margin:0;
+    }
+
+    .mini-card{
+        background:#fff;
+        border-radius:18px;
+        padding:22px;
+        border:1px solid #e5e7eb;
+        height:100%;
+        transition:0.2s ease;
+    }
+
+    .mini-card:hover{
+        transform:translateY(-2px);
+        box-shadow:0 10px 25px rgba(0,0,0,0.04);
+    }
+
+    .mini-icon{
+        width:52px;
+        height:52px;
+        border-radius:14px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:18px;
+    }
+
+    .salary-icon{
+        background:#ede9fe;
+        color:#7c3aed;
+    }
+
+    .status-icon{
+        background:#dcfce7;
+        color:#16a34a;
+    }
+
+    .date-icon{
+        background:#dbeafe;
+        color:#2563eb;
+    }
+
+    .card-label{
+        font-size:13px;
+        color:#6b7280;
+        margin-bottom:6px;
+    }
+
+    .card-value{
+        font-size:24px;
+        font-weight:700;
+        color:#111827;
+        margin-bottom:4px;
+    }
+
+    .card-sub{
+        font-size:13px;
+        color:#9ca3af;
+    }
+
+    .profile-panel{
+        background:#ffffff;
+        border-radius:18px;
+        padding:28px;
+        border:1px solid #e5e7eb;
+        height:100%;
+    }
+
+    .profile-title{
+        font-weight:700;
+        margin-bottom:20px;
+        color:#111827;
+    }
+
+    .info-row{
+        display:flex;
+        justify-content:space-between;
+        padding:14px 0;
+        border-bottom:1px solid #f1f5f9;
+    }
+
+    .info-row:last-child{
+        border-bottom:none;
+    }
+
+    .info-label{
+        color:#6b7280;
+        font-size:14px;
+    }
+
+    .info-value{
+        font-weight:600;
+        color:#111827;
+    }
+
+    .status-badge{
+        background:#dcfce7;
+        color:#166534;
+        padding:6px 12px;
+        border-radius:30px;
+        font-size:12px;
+        font-weight:700;
+    }
+
+    /* RIGHT COLOR CARD */
+
+    .highlight-card{
+        background:linear-gradient(135deg,#4f46e5,#7c3aed);
+        border-radius:22px;
+        padding:30px;
+        color:white;
+        height:100%;
+        position:relative;
+        overflow:hidden;
+        box-shadow:0 15px 35px rgba(79,70,229,0.25);
+    }
+
+    .highlight-card::after{
+        content:'';
+        position:absolute;
+        width:180px;
+        height:180px;
+        border-radius:50%;
+        background:rgba(255,255,255,0.08);
+        top:-50px;
+        right:-50px;
+    }
+
+    .highlight-card small{
+        text-transform:uppercase;
+        letter-spacing:1px;
+        opacity:0.8;
+        font-weight:600;
+    }
+
+    .highlight-card h2{
+        font-size:42px;
+        font-weight:800;
+        margin:14px 0;
+    }
+
+    .highlight-card p{
+        opacity:0.85;
+        line-height:1.7;
+    }
+
+    .highlight-list{
+        margin-top:25px;
+    }
+
+    .highlight-item{
+        display:flex;
+        align-items:center;
+        margin-bottom:16px;
+    }
+
+    .highlight-item i{
+        width:38px;
+        height:38px;
+        border-radius:10px;
+        background:rgba(255,255,255,0.15);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        margin-right:14px;
+    }
+
+   
+
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid py-4">
+
+    {# HEADER #}
+    <div class="dashboard-header">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+            <div>
+                <h2>
+                    Welcome, {{ teacherName }}
+                </h2>
+
+                <p>
+                    Teacher payroll overview for {{ currentMonth }}
+                </p>
+            </div>
+
+            <div class="mt-3 mt-md-0">
+                <span class="status-badge">
+                    Active Faculty Account
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    {# SMALL SUMMARY CARDS #}
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="mini-card">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="mini-icon salary-icon me-3">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="card-label">
+                            Monthly Salary
+                        </div>
+
+                        <div class="card-value">
+                            ${{ base_salary|number_format(2) }}
+                        </div>
+
+                        <div class="card-sub">
+                            Base salary structure
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="mini-card">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="mini-icon status-icon me-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="card-label">
+                            Payroll Status
+                        </div>
+
+                        <div class="card-value">
+                            {{ latestSalary.status }}
+                        </div>
+
+                        <div class="card-sub">
+                            Latest salary processing
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="mini-card">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="mini-icon date-icon me-3">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="card-label">
+                            Last Payment
+                        </div>
+
+                        <div class="card-value">
+                            {{ latestSalary.date }}
+                        </div>
+
+                        <div class="card-sub">
+                            Salary disbursal date
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {# MAIN SECTION #}
+    <div class="row g-4">
+
+        {# LEFT SIDE TABLE #}
+        <div class="col-lg-8">
+
+            <div class="profile-panel">
+
+                <h5 class="profile-title">
+                    Teacher Information
+                </h5>
+
+                <div class="info-row">
+
+                    <div class="info-label">
+                        Teacher Name
+                    </div>
+
+                    <div class="info-value">
+                        {{ teacherName }}
+                    </div>
+
+                </div>
+
+                <div class="info-row">
+
+                    <div class="info-label">
+                        Payroll Month
+                    </div>
+
+                    <div class="info-value">
+                        {{ currentMonth }}
+                    </div>
+
+                </div>
+
+                <div class="info-row">
+
+                    <div class="info-label">
+                        Salary Status
+                    </div>
+
+                    <div class="info-value text-success">
+                        {{ latestSalary.status }}
+                    </div>
+
+                </div>
+
+                <div class="info-row">
+
+                    <div class="info-label">
+                        Payment Date
+                    </div>
+
+                    <div class="info-value">
+                        {{ latestSalary.date }}
+                    </div>
+
+                </div>
+
+                <div class="info-row">
+
+                    <div class="info-label">
+                        Salary Amount
+                    </div>
+
+                    <div class="info-value">
+                        ${{ base_salary|number_format(2) }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {# RIGHT SIDE COLORFUL CARD #}
+        <div class="col-lg-4">
+
+            <div class="highlight-card">
+
+                <small>Teacher Workspace</small>
+
+                <h2>98%</h2>
+
+                <p>
+                    Faculty payroll account is active and synchronized successfully with the finance department.
+                </p>
+
+                <div class="highlight-list">
+
+                    <div class="highlight-item">
+
+                        <i class="fas fa-wallet"></i>
+
+                        <div>
+                            <strong>Salary Updated</strong><br>
+                            <small>Monthly payroll verified</small>
+                        </div>
+
+                    </div>
+
+                    <div class="highlight-item">
+
+                        <i class="fas fa-shield-check"></i>
+
+                        <div>
+                            <strong>Secure Account</strong><br>
+                            <small>Protected finance access</small>
+                        </div>
+
+                    </div>
+
+                    <div class="highlight-item">
+
+                        <i class="fas fa-building"></i>
+
+                        <div>
+                            <strong>School Connected</strong><br>
+                            <small>Institution finance linked</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

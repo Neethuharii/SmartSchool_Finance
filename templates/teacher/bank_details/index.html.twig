@@ -1,0 +1,130 @@
+{% extends 'teacher/base.html.twig' %}
+
+{% block title %}Bank Details - Arbor ERP{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body { background-color: #f4f7fe; }
+        .bank-card { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); background: white; }
+        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .detail-row { padding: 15px 0; border-bottom: 1px solid #f1f4f9; }
+        .detail-row:last-child { border-bottom: none; }
+        .label-text { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #a3aed0; font-weight: 700; }
+        .value-text { color: #2b3674; font-weight: 600; font-size: 1.1rem; }
+        .security-banner { background: linear-gradient(90deg, #4318FF 0%, #3311cc 100%); border-radius: 15px; color: white; padding: 20px; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    {# Header #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Bank Payout Details</h3>
+            <p class="text-muted small">Manage where your monthly salary is deposited.</p>
+        </div>
+        <div class="bg-white p-2 rounded-circle shadow-sm">
+            <img src="https://cdn-icons-png.flaticon.com/512/2830/2830284.png" width="40" alt="bank">
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {# Main Details #}
+        <div class="col-lg-8">
+            <div class="card bank-card p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary me-3">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-0">Primary Account Information</h5>
+                </div>
+
+                <div class="detail-row row">
+                    <div class="col-md-5 label-text">Account Holder Name</div>
+                    <div class="col-md-7 value-text">{{ teacher.firstName }} {{ teacher.lastName }}</div>
+                </div>
+
+                <div class="detail-row row">
+                    <div class="col-md-5 label-text">Bank Name</div>
+                    <div class="col-md-7 value-text">ICICI Bank</div>
+                </div>
+
+                <div class="detail-row row">
+                    <div class="col-md-5 label-text">Account Number</div>
+                    <div class="col-md-7 value-text">
+                        {# Masking the account number for security #}
+                        **** **** 098{{ teacher.accountNumber|slice(-4) }}
+                    </div>
+                </div>
+
+                <div class="detail-row row">
+                    <div class="col-md-5 label-text">IFSC / SWIFT Code</div>
+                    <div class="col-md-7 value-text">ICICI009874I</div>
+                </div>
+
+                <div class="detail-row row">
+                    <div class="col-md-5 label-text">Branch Name</div>
+                    <div class="col-md-7 value-text">Thiruvanathapuaram</div>
+                </div>
+            </div>
+        </div>
+
+     {# Sidebar / Security #}
+<div class="col-lg-4">
+
+    <div class="security-banner mb-4">
+        <h6 class="fw-bold">
+            <i class="fas fa-shield-alt me-2"></i> Secure Payouts
+        </h6>
+        <p class="small mb-0 opacity-75">
+            Your bank details are encrypted and used only for payroll processing.
+        </p>
+    </div>
+
+    {# STATIC INFO CARD (NEW) #}
+    <div class="card bank-card p-4">
+
+        <h6 class="fw-bold text-dark mb-3">
+            Account Status
+        </h6>
+
+        <div class="d-flex align-items-center mb-3">
+            <div class="icon-box bg-success bg-opacity-10 text-success me-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <div>
+                <div class="fw-bold text-dark">Verified Account</div>
+                <small class="text-muted">Bank details approved by finance system</small>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center mb-3">
+            <div class="icon-box bg-primary bg-opacity-10 text-primary me-3">
+                <i class="fas fa-lock"></i>
+            </div>
+
+            <div>
+                <div class="fw-bold text-dark">Encrypted Storage</div>
+                <small class="text-muted">AES-256 secured banking data</small>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center">
+            <div class="icon-box bg-warning bg-opacity-10 text-warning me-3">
+                <i class="fas fa-clock"></i>
+            </div>
+
+            <div>
+                <div class="fw-bold text-dark">Auto Payroll Ready</div>
+                <small class="text-muted">Used in monthly salary processing cycle</small>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Month-End Reconciliation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Shared Badge Colors */
+        .bg-soft-success { background: rgba(76, 175, 80, 0.1); color: #2e7d32; }
+        .bg-soft-danger { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+        .bg-soft-primary { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+        .bg-soft-warning { background: rgba(255, 152, 0, 0.1); color: #ef6c00; }
+        .icon-circle { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+        
+        /* Bank Sync Styles */
+        .bank-gradient { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .scan-line {
+            width: 100%; height: 2px; background: #0dcaf0;
+            position: absolute; top: 0; left: 0;
+            animation: scan 2s infinite linear;
+            box-shadow: 0 0 10px #0dcaf0;
+        }
+        @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
+        #syncOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div id="syncOverlay">
+    <div class="position-relative overflow-hidden rounded p-4 mb-3" style="width: 100px; height: 100px; background: #f8f9fc;">
+        <i class="fas fa-university fs-1 text-primary position-absolute top-50 start-50 translate-middle"></i>
+        <div class="scan-line"></div>
+    </div>
+    <h3 class="fw-bold text-dark">Establishing Secure Connection</h3>
+    <p class="text-muted" id="syncText">Authenticating via Open Banking API...</p>
+</div>
+
+<div class="container py-4">
+    
+    {# --- HEADER --- #}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Financial Reconciliation</h2>
+            <span class="badge bg-light text-dark p-2 border mt-2">Closing Period: {{ currentMonth }}</span>
+        </div>
+        <div>
+            <button onclick="startSync()" class="btn btn-dark shadow-sm rounded-pill px-4 fw-bold me-2">
+                <i class="fas fa-sync-alt me-2"></i> Sync Bank API
+            </button>
+            <button onclick="window.print()" class="btn btn-outline-dark shadow-sm rounded-pill px-4 fw-bold">
+                <i class="fas fa-print me-2"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    {# --- TOP METRIC CARDS --- #}
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-circle bg-soft-success me-3 fs-4"><i class="fas fa-arrow-down"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase tracking-wide mb-1">Total Incoming</div>
+                        <h3 class="fw-bold text-dark mb-0">${{ totalIncoming|number_format(2) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-circle bg-soft-danger me-3 fs-4"><i class="fas fa-arrow-up"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase tracking-wide mb-1">Total Outgoing</div>
+                        <h3 class="fw-bold text-dark mb-0">${{ totalOutgoing|number_format(2) }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2" style="background-color: #f8f9fc;">
+                <div class="card-body d-flex align-items-center">
+                    <div class="icon-circle {{ isProfitable ? 'bg-soft-primary' : 'bg-soft-warning' }} me-3 fs-4">
+                        <i class="fas {{ isProfitable ? 'fa-balance-scale' : 'fa-exclamation-triangle' }}"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-bold text-uppercase tracking-wide mb-1">Net Balance</div>
+                        <h3 class="fw-bold {{ isProfitable ? 'text-primary' : 'text-warning' }} mb-0">
+                            {{ isProfitable ? '+' : '-' }}${{ netBalance|number_format(2) }}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# --- TWO COLUMN LAYOUT: LEDGER (LEFT) & BANK API (RIGHT) --- #}
+    <div class="row">
+        <div class="col-xl-5 mb-4">
+            <h5 class="fw-bold text-dark mb-3 ms-1">Internal Ledger Summary</h5>
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small fw-bold">
+                            <tr>
+                                <th class="ps-4">CATEGORY</th>
+                                <th class="text-end pe-4">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="fw-bold text-dark">Student Tuition Fees</div>
+                                    <span class="badge bg-light text-dark border px-2 py-1 mt-1"><i class="fas fa-plus text-success me-1"></i> Credit</span>
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-success">+ ${{ totalIncoming|number_format(2) }}</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="fw-bold text-dark">Staff Payroll Disbursal</div>
+                                    <span class="badge bg-light text-dark border px-2 py-1 mt-1"><i class="fas fa-minus text-danger me-1"></i> Debit</span>
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-danger">- ${{ totalOutgoing|number_format(2) }}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <td class="text-end fw-bold text-muted py-3">MONTHLY CLOSING:</td>
+                                <td class="text-end pe-4 fw-bold fs-5 {{ isProfitable ? 'text-primary' : 'text-warning' }} py-3">
+                                    {{ isProfitable ? '+' : '-' }}${{ netBalance|number_format(2) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-7 mb-4">
+            <div class="d-flex justify-content-between align-items-end mb-3 ms-1 pe-1">
+                <h5 class="fw-bold text-dark mb-0">Live Bank Feed Match</h5>
+                <small class="text-muted"><i class="fas fa-link text-primary me-1"></i> {{ bankName }}</small>
+            </div>
+            
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-light text-muted small fw-bold">
+                            <tr>
+                                <th class="ps-4">EXTERNAL TRANSACTION</th>
+                                <th>AMOUNT</th>
+                                <th class="text-end pe-4">SYSTEM MATCH</th>
+                            </tr>
+                        </thead>
+                      <tbody>
+    {% for txn in transactions %}
+        <tr>
+            <td class="ps-4 py-3">
+                <div class="fw-bold text-dark" style="font-size: 0.9rem;">
+                    {{ txn.description }}
+                </div>
+                <small class="text-muted">
+                    {{ txn.transactionDate|date('M d, Y') }} | {{ txn.referenceId }}
+                </small>
+            </td>
+
+            <td class="fw-bold {{ txn.type == 'credit' ? 'text-success' : 'text-danger' }}">
+                {{ txn.type == 'credit' ? '+' : '-' }}${{ txn.amount|abs|number_format(2) }}
+            </td>
+
+            <td class="text-end pe-4">
+
+                {# 🟢 100% MATCH #}
+                {% if txn.confidenceScore >= 90 %}
+                    <span class="badge bg-success px-3 rounded-pill">
+                        <i class="fas fa-check-double me-1"></i>
+                        100% Match
+                    </span>
+                    <div class="small text-muted mt-1">
+                        {{ txn.matchedRecord }}
+                    </div>
+
+                {# 🟠 50% MATCH #}
+                {% elseif txn.confidenceScore >= 40 %}
+                    <span class="badge bg-warning text-dark px-3 rounded-pill">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        50% Match
+                    </span>
+
+                {# 🔴 0% MATCH #}
+                {% else %}
+                    <span class="badge bg-danger px-3 rounded-pill">
+                        <i class="fas fa-times-circle me-1"></i>
+                        0% Match
+                    </span>
+                {% endif %}
+
+            </td>
+        </tr>
+
+    {% else %}
+        <tr>
+            <td colspan="3" class="text-center py-5">
+                <i class="fas fa-university fs-2 text-muted mb-3 opacity-50"></i>
+                <h6 class="fw-bold text-dark">No Bank Data Synced</h6>
+                <p class="text-muted small mb-0">
+                    Click 'Sync Bank API' at the top to fetch latest transactions.
+                </p>
+            </td>
+        </tr>
+    {% endfor %}
+</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function startSync() {
+          
+            document.getElementById('syncOverlay').style.display = 'flex';
+            setTimeout(() => { document.getElementById('syncText').innerText = "Connecting to {{ bankName }} API..."; }, 800);
+            setTimeout(() => { document.getElementById('syncText').innerText = "Fetching new transactions & matching DB records..."; }, 1800);
+            
+           
+            fetch('{{ path('finance_reconciliation_bank_sync_process') }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    setTimeout(() => {
+                        document.getElementById('syncText').innerText = "Database Sync Complete! Reloading...";
+                        window.location.reload();
+                    }, 2800);
+                }
+            })
+            .catch(error => {
+                console.error('Sync failed:', error);
+                document.getElementById('syncText').innerText = "Connection Failed. Please try again.";
+            });
+        }
+    </script>
+{% endblock %}

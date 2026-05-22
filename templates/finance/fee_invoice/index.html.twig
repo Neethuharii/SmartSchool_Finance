@@ -1,0 +1,64 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Fee Invoices{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between mb-3">
+        <h3>Fee Invoices</h3>
+        <a href="{{ path('finance_invoice_new') }}" class="btn btn-primary">
+            + Create Invoice
+        </a>
+    </div>
+
+    <div class="card p-3 shadow-sm">
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Total</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for i in invoices %}
+                <tr>
+                    <td>#{{ i.id }}</td>
+                    <td>{{ i.student.fullName }}</td>
+                    <td>₹ {{ i.totalAmount }}</td>
+                    <td>₹ {{ i.paidAmount }}</td>
+                    <td>₹ {{ i.totalAmount - i.paidAmount }}</td>
+                    <td>{{ i.dueDate|date('d M Y') }}</td>
+
+                    <td>
+                        {% if i.status == 'paid' %}
+                            <span class="badge bg-success">Paid</span>
+                        {% elseif i.status == 'partial' %}
+                            <span class="badge bg-warning">Partial</span>
+                        {% else %}
+                            <span class="badge bg-danger">Pending</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">No invoices found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

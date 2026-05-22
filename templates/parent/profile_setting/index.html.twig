@@ -1,0 +1,501 @@
+{# templates/parent/profile/settings.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Account Settings - Arbor Finance
+{% endblock %}
+
+{% block body %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+    :root {
+        --primary: #4318FF;
+        --primary-soft: #f4f7fe;
+        --success: #11b981;
+        --text-main: #1c1c1c;
+        --text-secondary: #7d7c7a;
+        --card-bg: #ffffff;
+        --arbor-space-bg: #faf9f6; /* Nordic Minimalist Cream background */
+        --arbor-border: #e6e5e2;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: var(--arbor-space-bg) !important;
+        color: var(--text-main);
+        letter-spacing: -0.1px;
+    }
+
+    /* ===================================
+        PAGE BACKGROUND
+    ==================================== */
+    .page-wrapper {
+        min-height: 100vh;
+        background-color: var(--arbor-space-bg);
+        background-image: 
+            radial-gradient(at 80% 0%, rgba(67, 24, 255, 0.02) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(17, 185, 129, 0.01) 0px, transparent 50%);
+    }
+
+    /* ===================================
+        NAVBAR
+    ==================================== */
+    .navbar {
+        position: relative;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--arbor-border);
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .logo img {
+        width: 42px;
+    }
+
+    .logo h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .nav-links > a,
+    .dropdown-trigger {
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .nav-links > a:hover,
+    .dropdown-trigger:hover {
+        color: var(--primary);
+    }
+
+    /* DROPDOWN */
+    .nav-item-dropdown {
+        position: relative;
+    }
+
+    .dropdown-trigger {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .dropdown-trigger i {
+        font-size: 11px;
+        color: var(--text-secondary);
+        transition: transform 0.2s;
+    }
+
+    .nav-item-dropdown.active .dropdown-trigger i {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-content {
+        position: absolute;
+        top: 40px;
+        left: 0;
+        min-width: 220px;
+        background: var(--card-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        display: none;
+        border: 1px solid var(--arbor-border);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        animation: fadeIn 0.2s ease;
+    }
+
+    .dropdown-content.show {
+        display: block;
+    }
+
+    .dropdown-content a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .dropdown-content a:hover {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+
+    .logout-link {
+        border: 1px solid var(--arbor-border);
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 14px !important;
+        color: var(--text-main);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .logout-link:hover {
+        background: #fef2f2;
+        color: #dc2626 !important;
+        border-color: #fca5a5;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===================================
+        SETTINGS PAGE
+    ==================================== */
+    .settings-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px 80px;
+    }
+
+    .settings-card {
+        width: 100%;
+        max-width: 850px;
+        background: var(--card-bg);
+        border: 1px solid var(--arbor-border);
+        border-radius: 16px;
+        padding: 45px;
+    }
+
+    .profile-avatar {
+        width: 90px;
+        height: 90px;
+        background: var(--primary-soft);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 800;
+        margin: 0 auto 20px;
+        border: 1px solid var(--arbor-border);
+        text-transform: uppercase;
+        letter-spacing: -0.5px;
+    }
+
+    .form-heading {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .glass-input {
+        width: 100%;
+        background: var(--arbor-space-bg);
+        border: 1px solid var(--arbor-border);
+        color: var(--text-main);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .glass-input:focus {
+        background: var(--card-bg);
+        border-color: var(--text-main);
+        outline: none;
+    }
+
+    .section-divider {
+        height: 1px;
+        background: var(--arbor-border);
+        margin: 40px 0;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .save-btn {
+        background: #1c1c1c;
+        border: none;
+        color: #fff;
+        padding: 14px 35px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+
+    .save-btn:hover {
+        opacity: 0.9;
+    }
+
+    .back-link {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: var(--text-main);
+    }
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+        .navbar {
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .nav-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .grid {
+            grid-template-columns: 1fr;
+        }
+
+        .settings-card {
+            padding: 30px 20px;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+
+    <header class="navbar">
+        <div class="logo">
+            <img src="{{ asset('images/arborlogo-removebg-preview.png') }}" alt="Logo">
+            <h2>Arbor <span style="font-weight:300; color: var(--text-secondary);">Finance</span></h2>
+        </div>
+
+        <nav class="nav-links">
+            <a href="{{ path('parent_dashboard') }}">Overview</a>
+
+            <div class="nav-item-dropdown">
+                <a class="dropdown-trigger">
+                    Payments <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{{ path('parent_pay_online') }}">
+                        <i class="fas fa-credit-card"></i> Pay Online
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-item-dropdown active">
+                <a class="dropdown-trigger">
+                    Settings <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-content show">
+                    <a href="{{ path('parent_profile') }}">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                </div>
+            </div>
+
+            <a href="{{ path('app_logout') }}" class="logout-link">Logout</a>
+        </nav>
+    </header>
+
+    <div class="settings-wrapper">
+        <div class="settings-card">
+
+            <div style="text-align:center; margin-bottom:45px;">
+                <div class="profile-avatar">
+                    {{ user.firstName|slice(0,1) }}{{ user.lastName|slice(0,1) }}
+                </div>
+
+                <h2 style="font-size: 24px; font-weight: 800; color: var(--text-main); margin-bottom:6px;">
+                    {{ user.firstName }} {{ user.lastName }}
+                </h2>
+
+                <p style="color: var(--text-secondary); font-size: 13px; font-weight: 500;">
+                    Parent Account ID: #{{ user.id }}
+                </p>
+            </div>
+
+            {% for message in app.flashes('success') %}
+                <div style="
+                    background: #f0fdf4;
+                    border: 1px solid #bbf7d0;
+                    color: #16a34a;
+                    padding: 14px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 30px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                ">
+                    <i class="fas fa-check-circle"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <form method="POST">
+                <h3 class="form-heading">Personal Information</h3>
+
+                <div class="grid">
+                    <div>
+                        <label class="form-label">First Name</label>
+                        <input type="text"
+                               name="first_name"
+                               class="glass-input"
+                               value="{{ user.firstName }}"
+                               required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Last Name</label>
+                        <input type="text"
+                               name="last_name"
+                               class="glass-input"
+                               value="{{ user.lastName }}"
+                               required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Email Address</label>
+                        <input type="email"
+                               class="glass-input"
+                               value="{{ user.email }}"
+                               readonly
+                               style="opacity:0.65; cursor: not-allowed; background-color: var(--arbor-border);">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Phone Number</label>
+                        <input type="text"
+                               name="phone"
+                               class="glass-input"
+                               value="{{ user.phone }}">
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <h3 class="form-heading">Security Changes</h3>
+
+                <div class="grid">
+                    <div>
+                        <label class="form-label">New Password</label>
+                        <input type="password"
+                               name="new_password"
+                               class="glass-input"
+                               placeholder="Leave blank to keep current">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password"
+                               class="glass-input"
+                               placeholder="Re-enter password">
+                    </div>
+                </div>
+
+                <div style="
+                    margin-top: 50px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                ">
+                    <a href="{{ path('parent_dashboard') }}" class="back-link">
+                        <i class="fas fa-arrow-left" style="margin-right: 6px;"></i> Return to Dashboard
+                    </a>
+
+                    <button type="submit" class="save-btn">
+                        Save Identity Preferences
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dropdowns = document.querySelectorAll('.nav-item-dropdown');
+
+    dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const menu = dropdown.querySelector('.dropdown-content');
+
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            dropdowns.forEach(otherDropdown => {
+                if (otherDropdown !== dropdown) {
+                    otherDropdown.classList.remove('active');
+                    otherDropdown.querySelector('.dropdown-content').classList.remove('show');
+                }
+            });
+
+            dropdown.classList.toggle('active');
+            menu.classList.toggle('show');
+        });
+    });
+
+    window.addEventListener('click', function () {
+        dropdowns.forEach(dropdown => {
+            dropdown.classList.remove('active');
+            dropdown.querySelector('.dropdown-content').classList.remove('show');
+        });
+    });
+});
+</script>
+
+{% endblock %}

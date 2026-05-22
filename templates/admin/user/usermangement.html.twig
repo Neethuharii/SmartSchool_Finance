@@ -1,0 +1,347 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Manage Staff & Roles - Admin Portal{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+            padding: 25px;
+        }
+        
+        .custom-table th {
+            color: #a3aed1;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #f4f7fe;
+            padding-bottom: 15px;
+        }
+        
+        .custom-table td {
+            padding: 15px 10px;
+            border-bottom: 1px dashed #e2e8f0;
+            color: #2b3674;
+            vertical-align: middle;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .action-icon {
+            color: #a3aed1;
+            transition: 0.2s;
+            margin: 0 5px;
+            font-size: 1.1rem;
+        }
+        
+        .action-icon:hover {
+            color: #4318FF;
+            transform: scale(1.1);
+        }
+
+        
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .role-admin { background: #e9e3ff; color: #4318FF; }
+        .role-accountant { background: #e0faf1; color: #05CD99; }
+        .role-teacher { background: #fff8dd; color: #e6b400; }
+        .role-user { background: #f4f7fe; color: #a3aed1; }
+
+       
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .dot-active { background-color: #05CD99; }
+        .dot-inactive { background-color: #EE5D50; }
+        
+        
+        .modal-content { border-radius: 15px; border: none; }
+        .modal-header { border-bottom: 1px solid #f4f7fe; }
+        .modal-footer { border-top: 1px solid #f4f7fe; }
+    </style>
+    
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-0">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #2b3674;">Manage Staff & Users</h2>
+            <p class="text-muted mb-0">Manage roles, access, and staff accounts.</p>
+        </div>
+        <button type="button" class="btn px-4 py-2 text-white fw-bold" style="background: #4318FF; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+            <i class="fas fa-plus me-2"></i> Add Staff
+        </button>
+    </div>
+
+    <div class="glass-card">
+        <div class="d-flex justify-content-between mb-4">
+            <div class="input-group w-50">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control bg-light border-0" placeholder="Search by name or email...">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table table-borderless align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Staff Member</th>
+                        <th>Contact Info</th>
+                        <th>System Role</th>
+                        <th>Status</th>
+                        <th>Joined On</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if staffMembers|length > 0 %}
+                    {% for staff in staffMembers %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-circle shadow-sm" style="background: linear-gradient(135deg, #111827 0%, #4318FF 100%);">
+                                        {{ staff.firstName|first|upper }}
+                                    </div>
+                                    <div class="fw-bold text-dark">{{ staff.name }}</div>
+                                </div>
+                            </td>
+                            <td class="text-muted">
+                                <div><i class="fas fa-envelope me-1" style="font-size: 0.8rem;"></i> {{ staff.email }}</div>
+                                <div class="mt-1"><i class="fas fa-phone-alt me-1" style="font-size: 0.8rem;"></i> {{ staff.phone }}</div>
+                            </td>
+                            <td>
+                                {% set currentRole = staff.role %}
+                                {% if currentRole == 'admin' %}
+                                    <span class="role-badge role-admin">Admin</span>
+                                {% elseif currentRole == 'accountant' %}
+                                    <span class="role-badge role-accountant">Accountant</span>
+                                {% elseif currentRole == 'teacher' %}
+                                    <span class="role-badge role-teacher">Teacher</span>
+                                {% else %}
+                                    <span class="role-badge role-user">User</span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-semibold">
+                                {% if staff.status == 'active' %}
+                                    <span class="text-dark"><span class="status-dot dot-active"></span> Active</span>
+                                {% else %}
+                                    <span class="text-muted"><span class="status-dot dot-inactive"></span> Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted">{{ staff.createdAt ? staff.createdAt|date('d M Y') : 'N/A' }}</td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-sm text-primary p-0 action-icon border-0 bg-transparent" 
+                                            title="Edit"
+                                            onclick="openEditModal(
+                                                '{{ staff.id }}', 
+                                                '{{ staff.firstName|e('js') }}', 
+                                                '{{ staff.lastName|e('js') }}', 
+                                                '{{ staff.email|e('js') }}', 
+                                                '{{ staff.phone|e('js') }}', 
+                                                '{{ currentRole|e('js') }}', 
+                                                '{{ staff.status|e('js') }}'
+                                            )">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <form action="{{ path('admin_delete_staff', {'id': staff.id}) }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this staff member?');" style="margin: 0;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_staff_' ~ staff.id) }}">
+                                        <button type="submit" class="btn btn-sm text-danger p-0 action-icon border-0 bg-transparent" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted fw-semibold">
+                            <div class="mb-3"><i class="fas fa-user-tie fs-1" style="color: #e2e8f0;"></i></div>
+                            No staff members found.
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="color: #2b3674;">Add New Staff Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form action="{{ path('admin_manage_staff') }}" method="POST">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_staff') }}">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" class="form-control bg-light border-0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" class="form-control bg-light border-0" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Email Address (Login) <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control bg-light border-0" required placeholder="name@school.edu">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" name="phone" class="form-control bg-light border-0" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">System Role <span class="text-danger">*</span></label>
+                            <select name="role" class="form-select bg-light border-0" required>
+                                <option value="teacher">Teacher</option>
+                                <option value="accountant">Accountant</option>
+                                <option value="admin">Super Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Initial Password <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control bg-light border-0" required placeholder="Create a strong password">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background: #4318FF;">Save Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" style="color: #2b3674;">Edit Staff Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="editStaffForm" method="POST">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="_token" id="edit_csrf_token">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" id="edit_first_name" class="form-control bg-light border-0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" id="edit_last_name" class="form-control bg-light border-0" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" id="edit_email" class="form-control bg-light border-0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" name="phone" id="edit_phone" class="form-control bg-light border-0" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">System Role <span class="text-danger">*</span></label>
+                            <select name="role" id="edit_role" class="form-select bg-light border-0" required>
+                                <option value="teacher">Teacher</option>
+                                <option value="accountant">Accountant</option>
+                                <option value="admin">Super Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Status</label>
+                            <select name="status" id="edit_status" class="form-select bg-light border-0">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white fw-bold px-4" style="background: #4318FF;">Update Staff</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function openEditModal(id, firstName, lastName, email, phone, role, status) {
+            
+            document.getElementById('edit_first_name').value = firstName;
+            document.getElementById('edit_last_name').value = lastName;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_phone').value = phone;
+            document.getElementById('edit_role').value = role;
+            document.getElementById('edit_status').value = status;
+        
+            let formAction = "{{ path('admin_edit_staff', {'id': 'ID_PLACEHOLDER'}) }}";
+            formAction = formAction.replace('ID_PLACEHOLDER', id);
+            document.getElementById('editStaffForm').action = formAction;
+
+            let tokens = {
+                {% for staff in staffMembers %}
+                    "{{ staff.id }}": "{{ csrf_token('edit_staff_' ~ staff.id) }}"{% if not loop.last %},{% endif %}
+                {% endfor %}
+            };
+            document.getElementById('edit_csrf_token').value = tokens[id];
+
+     
+            var editModal = new bootstrap.Modal(document.getElementById('editStaffModal'));
+            editModal.show();
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Daily Collection - ArborFinance{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .print-only { display: none; }
+        
+       
+        @media print {
+            body * { visibility: hidden; }
+            .no-print { display: none !important; }
+            #printableReport, #printableReport * { visibility: visible; }
+            #printableReport {
+                position: absolute; left: 0; top: 0; width: 100%;
+                padding: 20px; color: #000;
+            }
+            .print-only { display: block; }
+            .table { border: 1px solid #000; }
+            .table th, .table td { border: 1px solid #000 !important; padding: 8px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4 no-print">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="fw-bold text-dark mb-1">Daily Collection Report</h2>
+            <p class="text-muted small">End-of-day reconciliation and receipt log.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <form method="GET" class="d-inline-flex align-items-center gap-2">
+                <label class="fw-bold small text-muted text-uppercase">Select Date:</label>
+                <input type="date" name="date" class="form-control border-light bg-white shadow-sm" 
+                       value="{{ selectedDate|date('Y-m-d') }}" onchange="this.form.submit()">
+                <button type="button" onclick="window.print()" class="btn btn-dark shadow-sm">
+                    <i class="fas fa-print me-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-primary text-white">
+                <span class="small fw-bold opacity-75">TOTAL COLLECTED</span>
+                <h3 class="fw-bold mb-0 mt-2">${{ totalCollection|number_format(2) }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-start border-4 border-success">
+                <span class="small fw-bold text-muted text-uppercase">Physical Cash</span>
+                <h4 class="fw-bold text-success mb-0 mt-2">${{ methodBreakdown['Cash']|number_format(2) }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-start border-4 border-info">
+                <span class="small fw-bold text-muted text-uppercase">Bank Transfers</span>
+                <h4 class="fw-bold text-info mb-0 mt-2">${{ methodBreakdown['Bank Transfer']|number_format(2) }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 border-start border-4 border-warning">
+                <span class="small fw-bold text-muted text-uppercase">Card / Online</span>
+                <h4 class="fw-bold text-warning mb-0 mt-2">${{ methodBreakdown['Card/Online']|number_format(2) }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="bg-light text-muted small fw-bold">
+                        <tr>
+                            <th class="ps-4 py-3">TIME</th>
+                            <th class="py-3">RECEIPT REF</th>
+                            <th class="py-3">STUDENT NAME</th>
+                            <th class="py-3">PAYMENT METHOD</th>
+                            <th class="text-end pe-4 py-3">AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                            <tr>
+                             <td class="ps-4 text-muted">{{ payment.paidAt|date('h:i A') }}</td>
+                                <td><span class="badge bg-light text-dark border">#RC-{{ payment.id|format("%05d") }}</span></td>
+                                <td class="fw-bold">{{ payment.student.firstName ?? 'Unknown' }} {{ payment.student.lastName ?? '' }}</td>
+                                <td>
+                                    {% if payment.method == 'Cash' %}
+                                        <span class="text-success fw-bold"><i class="fas fa-money-bill-wave me-1"></i> Cash</span>
+                                    {% else %}
+                                        <span class="text-info fw-bold"><i class="fas fa-university me-1"></i> {{ payment.method }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4 fw-bold">${{ payment.amount|number_format(2) }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">No collections recorded for {{ selectedDate|date('d M, Y') }}.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="printableReport" class="print-only">
+    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="margin: 0; text-transform: uppercase;">ArborFinance Academy</h2>
+        <h4 style="margin: 5px 0;">Daily Collection Tally Sheet</h4>
+        <p style="margin: 0;">Date: <strong>{{ selectedDate|date('d F Y') }}</strong> | Printed: {{ "now"|date('d/m/Y h:i A') }}</p>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <div style="width: 48%; border: 1px solid #000; padding: 15px;">
+            <h5 style="margin-top: 0;">Summary Breakdown</h5>
+            <p style="margin: 5px 0; display: flex; justify-content: space-between;"><span>Cash in Drawer:</span> <strong>${{ methodBreakdown['Cash']|number_format(2) }}</strong></p>
+            <p style="margin: 5px 0; display: flex; justify-content: space-between;"><span>Bank/Online:</span> <strong>${{ (methodBreakdown['Bank Transfer'] + methodBreakdown['Card/Online'])|number_format(2) }}</strong></p>
+            <hr>
+            <p style="margin: 5px 0; display: flex; justify-content: space-between; font-size: 1.2rem;"><span>TOTAL EXPECTED:</span> <strong>${{ totalCollection|number_format(2) }}</strong></p>
+        </div>
+        <div style="width: 48%; border: 1px solid #000; padding: 15px;">
+            <h5 style="margin-top: 0;">Cashier Verification</h5>
+            <p style="margin-top: 25px; border-bottom: 1px solid #000; width: 80%;">Actual Cash Counted: $</p>
+            <p style="margin-top: 25px; border-bottom: 1px solid #000; width: 80%;">Discrepancy (+/-): $</p>
+        </div>
+    </div>
+
+    <table class="table" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: #f4f4f4;">
+                <th style="text-align: left;">Time</th>
+                <th style="text-align: left;">Receipt ID</th>
+                <th style="text-align: left;">Student</th>
+                <th style="text-align: left;">Method</th>
+                <th style="text-align: right;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+                <tr>
+                  <td>{{ payment.paidAt|date('H:i') }}</td>
+                    <td>RC-{{ payment.id|format("%05d") }}</td>
+                    <td>{{ payment.student.firstName ?? '' }}</td>
+                    <td>{{ payment.method }}</td>
+                    <td style="text-align: right;">${{ payment.amount|number_format(2) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+        <div style="text-align: center; width: 250px;">
+            <div style="border-top: 1px solid #000; padding-top: 5px;">Cashier Signature</div>
+        </div>
+        <div style="text-align: center; width: 250px;">
+            <div style="border-top: 1px solid #000; padding-top: 5px;">Bursar/Admin Signature</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

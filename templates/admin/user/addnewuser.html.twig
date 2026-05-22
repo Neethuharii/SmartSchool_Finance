@@ -1,0 +1,188 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Create User | Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        
+        .custom-input {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #2b3674;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .custom-input:focus {
+            background-color: #ffffff;
+            border-color: #868CFF;
+            box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.1);
+            outline: none;
+        }
+
+        .custom-label {
+            font-weight: 600;
+            color: #2b3674;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+       
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+        }
+
+      
+        .btn-back {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            color: #a3aed1;
+            transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .btn-back:hover {
+            color: #4318FF;
+            border-color: #4318FF;
+            background: #f4f7fe;
+            transform: translateX(-3px);
+        }
+
+       
+        select.custom-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a3aed1' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <div class="d-flex align-items-center mb-5 gap-3">
+        <a href="{{ path('admin_users') }}" class="btn-back text-decoration-none" title="Back to User List">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold mb-0" style="color: #2b3674;">Create New User</h2>
+            <p class="text-muted mb-0">Add a new staff member and assign system permissions.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card glass-card p-4 p-md-5">
+                
+                <form method="POST">
+                    
+                    <h5 class="fw-bold mb-4" style="color: #2b3674; border-bottom: 2px solid #f4f7fe; padding-bottom: 10px;">
+                        <i class="fas fa-id-badge text-primary me-2"></i> Account Details
+                    </h5>
+
+                    <div class="mb-4">
+                        <label class="custom-label">Full Name</label>
+                        <div class="position-relative">
+                            <i class="fas fa-user position-absolute text-muted" style="top: 50%; left: 16px; transform: translateY(-50%);"></i>
+                            <input type="text" name="fullName" class="form-control custom-input" placeholder="e.g. John Doe" style="padding-left: 45px;" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="custom-label">Email Address</label>
+                        <div class="position-relative">
+                            <i class="fas fa-envelope position-absolute text-muted" style="top: 50%; left: 16px; transform: translateY(-50%);"></i>
+                            <input type="email" name="email" class="form-control custom-input" placeholder="name@school.edu" style="padding-left: 45px;" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5 g-4">
+                        <div class="col-md-6">
+                            <label class="custom-label">Temporary Password</label>
+                            <div class="position-relative">
+                                <i class="fas fa-lock position-absolute text-muted" style="top: 50%; left: 16px; transform: translateY(-50%);"></i>
+                                <input type="password" name="password" class="form-control custom-input" placeholder="••••••••" style="padding-left: 45px;" required>
+                            </div>
+                            <div class="form-text text-muted mt-2" style="font-size: 0.8rem;">
+                                Minimum 8 characters required.
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="custom-label">Assign Role</label>
+                            <div class="position-relative">
+                                <i class="fas fa-shield-alt position-absolute text-muted" style="top: 50%; left: 16px; transform: translateY(-50%); z-index: 10;"></i>
+                                <select name="role" class="form-select custom-input" style="padding-left: 45px; cursor: pointer;" required>
+                                    <option value="" disabled selected>Select a role...</option>
+                                    <option value="ROLE_ADMIN">System Admin</option>
+                                    <option value="ROLE_MANAGER">Manager</option>
+                                    <option value="ROLE_ACCOUNTANT">Accountant</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="mb-4" style="border-color: #e2e8f0;">
+
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="{{ path('admin_users') }}" class="btn btn-light px-4 py-2 rounded-pill fw-bold" style="color: #a3aed1;">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn px-5 py-2 rounded-pill fw-bold text-white shadow-sm" style="background: linear-gradient(135deg, #4318FF 0%, #868CFF 100%); border: none; transition: 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <i class="fas fa-check me-2"></i> Create User
+                        </button>
+                    </div>
+                    
+                </form>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-xl-5 d-none d-lg-block">
+            <div class="card glass-card p-4 bg-light border-0">
+                <h5 class="fw-bold mb-4" style="color: #2b3674;">
+                    <i class="fas fa-info-circle text-primary me-2"></i> Role Permissions
+                </h5>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">
+                        <span class="badge" style="background: #feecea; color: #EE5D50;">System Admin</span>
+                    </h6>
+                    <p class="text-muted small mb-0 mt-2">Has unrestricted access to all modules, including system settings, academic year setup, and user management.</p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">
+                        <span class="badge" style="background: #e0f4ff; color: #009efd;">Manager</span>
+                    </h6>
+                    <p class="text-muted small mb-0 mt-2">Can oversee student records, view financial reports, and manage classes, but cannot delete records or alter core system settings.</p>
+                </div>
+                
+                <div>
+                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.9rem;">
+                        <span class="badge" style="background: #e0faf1; color: #05CD99;">Accountant</span>
+                    </h6>
+                    <p class="text-muted small mb-0 mt-2">Dedicated access to the finance module. Can collect fees, generate invoices, and manage expenses, but has limited access to academic settings.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

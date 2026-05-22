@@ -1,0 +1,256 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Staff Registry - Admin Portal{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-blue: #4318FF;
+            --secondary-text: #a3aed0;
+            --dark-blue: #2b3674;
+            --bg-soft: #f4f7fe;
+            --success-green: #05cd99;
+        }
+
+        .main-card {
+            background: #ffffff; border: none; border-radius: 20px;
+            box-shadow: 0px 10px 30px rgba(112, 144, 176, 0.1); padding: 10px;
+        }
+
+        .avatar-box {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #4318FF 0%, #868CFF 100%);
+            color: white; border-radius: 14px; display: flex;
+            align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(67, 24, 255, 0.2);
+        }
+
+        .teacher-name { color: var(--dark-blue); font-weight: 700; font-size: 1rem; margin-bottom: 0; }
+
+        .table thead th {
+            color: var(--secondary-text); font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 1px;
+            font-weight: 700; border: none; padding: 20px 15px;
+        }
+
+        .table tbody tr { border-bottom: 1px solid #f1f4f9; transition: 0.2s; }
+        .table tbody tr:hover { background-color: #fafcfe; }
+
+        .salary-badge {
+            background: #f4f7fe; color: var(--dark-blue);
+            padding: 8px 15px; border-radius: 10px;
+            font-weight: 800; font-family: 'DM Sans', sans-serif;
+        }
+
+        .status-pill {
+            padding: 6px 14px; border-radius: 10px;
+            font-weight: 700; font-size: 0.75rem;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+
+        .status-active { background: #e6faf5; color: var(--success-green); }
+        .status-inactive { background: #fff5f5; color: #ff5b5b; }
+
+        .action-btn {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: 0.3s; border: none; background: #f4f7fe;
+            color: var(--secondary-text); text-decoration: none; cursor: pointer;
+        }
+
+        .action-btn:hover { background: var(--primary-blue); color: white; transform: translateY(-2px); }
+
+        .btn-register {
+            background: var(--primary-blue); border: none; border-radius: 14px;
+            padding: 12px 24px; font-weight: 700;
+            box-shadow: 0px 10px 20px rgba(67, 24, 255, 0.2); transition: 0.3s;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid py-4" style="background: var(--bg-soft); min-height: 100vh;">
+
+        {# FLASH MESSAGES #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'danger' ? 'danger' : 'success' }} alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 15px;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-1" style="color: var(--dark-blue);">Staff Registry</h2>
+                <p class="text-muted small mb-0">Total Faculty Members: <span class="fw-bold" style="color: var(--primary-blue);">{{ teachers|length }}</span></p>
+            </div>
+            <button class="btn btn-primary btn-register px-4 text-white" data-bs-toggle="modal" data-bs-target="#addTeacherModal">
+                <i class="fas fa-plus-circle me-2"></i> Register Teacher
+            </button>
+        </div>
+
+        <div class="main-card shadow-sm">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Teacher Profile</th>
+                            <th>Staff ID</th>
+                            <th>Monthly Salary</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                            <tr>
+                                <td class="ps-4 py-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-box me-3">
+                                            {{ teacher.firstName|slice(0,1)|upper }}{{ teacher.lastName|slice(0,1)|upper }}
+                                        </div>
+                                        <div>
+                                            <p class="teacher-name">{{ teacher.firstName }} {{ teacher.lastName }}</p>
+                                            <small class="text-muted">Education Dept.</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="fw-bold text-muted small">#{{ teacher.staffId }}</span></td>
+                                <td><span class="salary-badge">${{ teacher.baseSalary|number_format(2) }}</span></td>
+                                <td>
+                                    <div class="status-pill {{ teacher.status == 'active' ? 'status-active' : 'status-inactive' }}">
+                                        <i class="fas {{ teacher.status == 'active' ? 'fa-check-circle' : 'fa-times-circle' }}"></i>
+                                        {{ teacher.status|upper }}
+                                    </div>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        {# EDIT TRIGGER #}
+                                        <button class="action-btn" data-bs-toggle="modal" data-bs-target="#editTeacherModal{{ teacher.id }}">
+                                            <i class="fas fa-pen"></i>
+                                        </button>
+
+                                        {# DELETE TRIGGER #}
+                                        <form action="{{ path('admin_delete_teacher', {'id': teacher.id}) }}" method="POST" onsubmit="return confirm('Delete this teacher record? This action cannot be undone.');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_teacher_' ~ teacher.id) }}">
+                                            <button type="submit" class="action-btn text-danger" style="background: #fff5f5;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {# EDIT MODAL PER TEACHER #}
+                        <div class="modal fade" id="editTeacherModal{{ teacher.id }}" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                                    <form action="{{ path('admin_edit_teacher', {'id': teacher.id}) }}" method="POST">
+                                        <div class="modal-header border-0 p-4">
+                                            <h5 class="fw-bold m-0">Edit Profile: {{ teacher.firstName }}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body p-4 pt-0">
+                                            <div class="row g-3">
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">FIRST NAME</label>
+                                                    <input type="text" name="first_name" class="form-control bg-light border-0 p-3" value="{{ teacher.firstName }}" required>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">LAST NAME</label>
+                                                    <input type="text" name="last_name" class="form-control bg-light border-0 p-3" value="{{ teacher.lastName }}" required>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label small fw-bold">STAFF ID</label>
+                                                    <input type="text" name="staff_id" class="form-control bg-light border-0 p-3" value="{{ teacher.staffId }}" required>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">BASE SALARY</label>
+                                                    <input type="number" name="base_salary" class="form-control bg-light border-0 p-3" value="{{ teacher.baseSalary }}" required>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label small fw-bold">STATUS</label>
+                                                    <select name="status" class="form-select bg-light border-0 p-3">
+                                                        <option value="active" {{ teacher.status == 'active' ? 'selected' : '' }}>Active</option>
+                                                        <option value="inactive" {{ teacher.status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-0 p-4">
+                                            <button type="button" class="btn btn-light px-4 fw-bold" data-bs-dismiss="modal" style="border-radius:12px;">Cancel</button>
+                                            <button type="submit" class="btn btn-primary px-4 fw-bold text-white" style="background: var(--primary-blue); border-radius:12px; border:none;">Update Profile</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="fas fa-user-slash fa-3x text-light mb-3"></i>
+                                <h5 class="text-muted">No faculty members found</h5>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {# ADD TEACHER MODAL #}
+    <div class="modal fade" id="addTeacherModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <form action="{{ path('admin_manage_teachers') }}" method="POST">
+                    <div class="modal-header border-0 p-4">
+                        <h5 class="fw-bold m-0" style="color: var(--dark-blue);">Add New Faculty Member</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 pt-0">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-secondary">FIRST NAME</label>
+                                <input type="text" name="first_name" class="form-control bg-light border-0 p-3" placeholder="John" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold text-secondary">LAST NAME</label>
+                                <input type="text" name="last_name" class="form-control bg-light border-0 p-3" placeholder="Doe" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">STAFF ID</label>
+                                <input type="text" name="staff_id" class="form-control bg-light border-0 p-3" placeholder="TCH-001" required>
+                            </div>
+
+
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">EMAIL</label>
+                                <input type="email" name="email" class="form-control bg-light border-0 p-3" placeholder="teacher@school.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">PASSWORD</label>
+                                <input type="password" name="password" class="form-control bg-light border-0 p-3" placeholder="Minimum 8 characters" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-secondary">MONTHLY BASE SALARY</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-0 bg-light fw-bold">$</span>
+                                    <input type="number" name="base_salary" class="form-control bg-light border-0 p-3" value="25000" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4">
+                        <button type="button" class="btn btn-light px-4 fw-bold" style="border-radius: 12px;" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold text-white" style="background: var(--primary-blue); border-radius: 12px; border: none;">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

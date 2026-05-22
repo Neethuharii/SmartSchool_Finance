@@ -1,0 +1,255 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Bulk Class Billing{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .billing-wrapper {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .section-header {
+            background: #f8fafc;
+            padding: 15px 25px;
+            margin: -30px -30px 25px -30px;
+            border-bottom: 1px solid #d1d5db;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-label {
+            font-weight: 700;
+            color: #334155;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border: 2px solid #cbd5e1 !important;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 1rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4318FF !important;
+            box-shadow: none;
+        }
+        .select2-container--default .select2-selection--single {
+            height: 52px; 
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        .btn-generate {
+            background-color: #ef4444; 
+            color: white;
+            padding: 12px 35px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-generate:hover {
+            background-color: #dc2626;
+        }
+        .btn-toggle-form {
+            background-color: #4318FF;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 10px 20px;
+        }
+        .btn-toggle-form:hover {
+            background-color: #3311CC;
+            color: white;
+        }
+        .warning-note {
+            background-color: #fff1f2;
+            border-left: 4px solid #e11d48;
+            padding: 15px;
+            border-radius: 4px;
+            color: #be123c;
+            margin-top: 25px;
+        }
+        
+        /* Table Styling */
+        .table thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .table tbody td {
+            vertical-align: middle;
+            color: #1e293b;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    
+    {# Flash Messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show border-0 shadow-sm">
+                <i class="fas fa-info-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold text-dark m-0">Class Billing Management</h4>
+        <button class="btn btn-toggle-form" type="button" data-bs-toggle="collapse" data-bs-target="#bulkFormContainer" aria-expanded="false" aria-controls="bulkFormContainer">
+            <i class="fas fa-plus me-2"></i> New Bulk Invoice
+        </button>
+    </div>
+
+    <div class="collapse mb-4" id="bulkFormContainer">
+        <div class="billing-wrapper border-primary" style="border-width: 2px;">
+            <form method="POST" onsubmit="return confirm('Are you sure you want to generate invoices for every student in this class?');">
+                
+                <div class="section-header bg-light">
+                    <h5 class="m-0 fw-bold text-dark">
+                        <i class="fas fa-layer-group me-2 text-danger"></i> Generate Bulk Invoices
+                    </h5>
+                    <button type="submit" class="btn btn-generate">
+                        <i class="fas fa-bolt me-1"></i> Confirm & Generate
+                    </button>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <label class="form-label text-primary">Target Class / Section</label>
+                        <select name="section_id" id="sectionSelect" class="form-select select2-section" required>
+                            <option value=""></option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}">
+                                    {{ section.academicClass.name }} - {{ section.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label class="form-label">Fee Category</label>
+                        <select name="category_id" class="form-select" required>
+                            <option value="">-- Select a Fee Category --</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% else %}
+                                <option value="1">Tuition Fee</option>
+                                <option value="2">Transport Fee</option>
+                                <option value="3">Library & Laboratory Fee</option>
+                                <option value="4">Extracurricular Activities</option>
+                                <option value="5">Late Payment Penalty</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-success">Amount per Student</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-2 border-end-0 fw-bold">
+                                <i class="fas fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" step="0.01" name="total_amount" class="form-control" placeholder="0.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-note">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>High Impact Action:</strong> Clicking "Confirm & Generate" will immediately calculate and attach a new debt to <strong>every active student</strong> in the selected class. This action cannot be easily undone.
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="billing-wrapper">
+        <h5 class="fw-bold mb-4">Available Classes for Billing</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Section Name</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for section in sections %}
+                        <tr>
+                            <td class="fw-bold">{{ section.academicClass.name }}</td>
+                            <td>{{ section.name }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="billSpecificClass({{ section.id }})">
+                                    <i class="fas fa-file-invoice-dollar me-1"></i> Bill this Class
+                                </button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No classes found in the system.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2-section').select2({
+                placeholder: "-- Search and Select a Class --",
+                allowClear: true,
+                width: '100%'
+            });
+            
+            // Fix Select2 width issue when hidden inside a Bootstrap collapse
+            $('#bulkFormContainer').on('shown.bs.collapse', function () {
+                $('.select2-section').select2('destroy').select2({
+                    placeholder: "-- Search and Select a Class --",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        });
+
+        // Function to handle the "Bill this Class" button clicks
+        function billSpecificClass(sectionId) {
+            // 1. Open the hidden form panel
+            var formCollapse = new bootstrap.Collapse(document.getElementById('bulkFormContainer'), {
+                show: true
+            });
+            
+            // 2. Automatically select the class in the dropdown
+            $('#sectionSelect').val(sectionId).trigger('change');
+            
+            // 3. Scroll the user smoothly to the form
+            $('html, body').animate({
+                scrollTop: $("#bulkFormContainer").offset().top - 50
+            }, 500);
+        }
+    </script>
+{% endblock %}

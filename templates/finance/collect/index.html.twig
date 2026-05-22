@@ -1,0 +1,130 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4">Collect Fee</h5>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">SELECT STUDENT</label>
+                        <select name="student_id" class="form-select border-0 bg-light p-3 select2-student" required>
+                            <option value="">Search by Name or Admission No...</option>
+                            {% for student in students %}
+                                <option value="{{ student.id }}">
+                                    {{ student.firstName }} {{ student.lastName }} ({{ student.admissionNo }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">PAYMENT METHOD</label>
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="method" id="cash" value="Cash" checked>
+                            <label class="btn btn-outline-primary flex-fill border-2 py-2" for="cash">Cash</label>
+
+                            <input type="radio" class="btn-check" name="method" id="bank" value="Bank Transfer">
+                            <label class="btn btn-outline-primary flex-fill border-2 py-2" for="bank">Bank</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">AMOUNT TO PAY</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-light fw-bold">$</span>
+                            <input type="number" name="amount" class="form-control border-0 bg-light p-3 fw-bold" placeholder="0.00" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow" style="background: #4318FF; border:none; border-radius: 12px;">
+                        Confirm & Record Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 bg-white">
+                <h6 class="text-muted fw-bold mb-4">INVOICE PREVIEW</h6>
+                <div id="paymentPreview">
+                    <div id="previewContent" style="display: none;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Standard Tuition Fee</span>
+                            <span class="fw-bold">$<span id="displayBase">0.00</span></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>Waiver: <span id="displayDiscountName">None</span></span>
+                            <span class="fw-bold">-$<span id="displayDiscountValue">0.00</span></span>
+                        </div>
+                        
+                        <hr class="my-4 border-dashed">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h4 class="fw-bold m-0 text-dark">Total Due</h4>
+                                <small class="text-muted text-uppercase tracking-wider">Net Payable</small>
+                            </div>
+                            <h2 class="fw-bold text-primary">$<span id="displayTotal">0.00</span></h2>
+                        </div>
+                    </div>
+
+                    <div id="previewPlaceholder" class="text-center py-5">
+                        <i class="fas fa-user-circle fa-3x text-light mb-3"></i>
+                        <p class="text-muted">Select a student to view invoice details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed { border-top: 2px dashed #e2e8f0; }
+    .tracking-wider { letter-spacing: 1px; }
+</style>
+{% endblock %} 
+{% block javascripts %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.querySelector('.select2-student');
+    const placeholder = document.getElementById('previewPlaceholder');
+    const content = document.getElementById('previewContent');
+
+    studentSelect.addEventListener('change', function() {
+        const studentId = this.value;
+
+        if (!studentId) {
+            placeholder.style.display = 'block';
+            content.style.display = 'none';
+            return;
+        }
+
+    
+        const url = "{{ path('api_get_student_data', {'id': 'PLACEHOLDER'}) }}".replace('PLACEHOLDER', studentId);
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Server returned ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('displayBase').textContent = data.baseFee;
+                document.getElementById('displayDiscountName').textContent = data.discountName;
+                document.getElementById('displayDiscountValue').textContent = data.discountValue;
+                document.getElementById('displayTotal').textContent = data.totalDue;
+
+                placeholder.style.display = 'none';
+                content.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                placeholder.innerHTML = '<i class="fas fa-exclamation-circle text-danger fa-2x"></i><p class="text-danger mt-2">Error: ' + error.message + '</p>';
+            });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Manage Classes & Sections - Admin Portal{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+            padding: 25px;
+            transition: transform 0.2s ease-in-out;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+        }
+        .section-badge {
+            background: #f4f7fe;
+            color: #2b3674;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-delete-section {
+            color: #EE5D50;
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: 0.2s;
+        }
+        .btn-delete-section:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-0">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm" role="alert" style="border-radius: 10px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #2b3674;">Classes & Sections</h2>
+            <p class="text-muted mb-0">Organize your academic structure.</p>
+        </div>
+        <button type="button" class="btn px-4 py-2 text-white fw-bold" style="background: #4318FF; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#addClassModal">
+            <i class="fas fa-plus me-2"></i> Add Class
+        </button>
+    </div>
+
+    <div class="row g-4">
+        {% if classes|length > 0 %}
+            {% for class in classes %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="glass-card h-100 d-flex flex-column">
+                        
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <h4 class="fw-bold m-0" style="color: #2b3674;">
+                                <i class="fas fa-layer-group text-primary me-2" style="font-size: 1.2rem;"></i> 
+                                {{ class.name }}
+                            </h4>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light border-0 text-muted" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="border-radius: 10px;">
+                                    <li>
+                                        <form action="{{ path('admin_delete_class', {'id': class.id}) }}" method="POST" onsubmit="return confirm('WARNING: Deleting this class will also delete all its sections. Are you sure?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_class_' ~ class.id) }}">
+                                            <button type="submit" class="dropdown-item text-danger fw-semibold">
+                                                <i class="fas fa-trash me-2"></i> Delete Class
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="flex-grow-1 mb-4">
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for section in class.sections %}
+                                    <div class="section-badge shadow-sm">
+                                        Section {{ section.name }}
+                                        
+                                        <form action="{{ path('admin_delete_section', {'id': section.id}) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this section?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_section_' ~ section.id) }}">
+                                            <button type="submit" class="btn-delete-section" title="Remove Section"><i class="fas fa-times-circle"></i></button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small italic">No sections created yet.</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-light w-100 fw-bold text-primary" style="border-radius: 10px;" onclick="openSectionModal('{{ class.id }}', '{{ class.name|e('js') }}')">
+                                <i class="fas fa-plus me-1"></i> Add Section
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-school fs-1 text-muted mb-3" style="opacity: 0.3;"></i>
+                <h5 class="text-muted fw-bold">No academic classes found</h5>
+                <p class="text-muted">Get started by creating your first class (e.g., Grade 1).</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="addClassModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3" style="border-radius: 15px; border: none;">
+            <form action="{{ path('admin_manage_classes') }}" method="POST">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" style="color: #2b3674;">Create New Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="add_class" value="1">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_class') }}">
+                    
+                    <label class="form-label fw-semibold text-muted small">Class Name <span class="text-danger">*</span></label>
+                    <input type="text" name="class_name" class="form-control bg-light border-0 py-2" placeholder="e.g. Grade 10" required>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn text-white fw-bold w-100 py-2" style="background: #4318FF; border-radius: 10px;">Save Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addSectionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3" style="border-radius: 15px; border: none;">
+            <form action="{{ path('admin_manage_classes') }}" method="POST">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" style="color: #2b3674;">Add Section to <span id="display_class_name" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="add_section" value="1">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_section') }}">
+                    <input type="hidden" name="class_id" id="modal_class_id">
+                    
+                    <label class="form-label fw-semibold text-muted small">Section Name <span class="text-danger">*</span></label>
+                    <input type="text" name="section_name" class="form-control bg-light border-0 py-2" placeholder="e.g. A, B, or Science" required>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn text-white fw-bold w-100 py-2" style="background: #05CD99; border-radius: 10px;">Save Section</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function openSectionModal(classId, className) {
+           
+            document.getElementById('modal_class_id').value = classId;
+           
+            document.getElementById('display_class_name').innerText = className;
+            
+            // Trigger the modal
+            var sectionModal = new bootstrap.Modal(document.getElementById('addSectionModal'));
+            sectionModal.show();
+        }
+    </script>
+{% endblock %}

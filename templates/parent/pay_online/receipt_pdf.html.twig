@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            margin: 0.5in;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #2b3674;
+            line-height: 1.4;
+            background: #fff;
+        }
+        /* Header Table */
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #4318FF;
+            padding-bottom: 20px;
+        }
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .logo span {
+            color: #4318FF;
+        }
+        .receipt-title {
+            text-align: right;
+            font-size: 20px;
+            font-weight: bold;
+            color: #4318FF;
+        }
+        /* Stamp */
+        .paid-stamp {
+            border: 3px solid #05cd99;
+            color: #05cd99;
+            padding: 5px 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        /* Info Grid */
+        .info-table {
+            width: 100%;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .info-table td {
+            vertical-align: top;
+            width: 50%;
+        }
+        .label {
+            font-size: 10px;
+            color: #a3aed0;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .value {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        /* Fee Table */
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .fee-table th {
+            background-color: #f4f7fe;
+            padding: 10px;
+            text-align: left;
+            font-size: 11px;
+            color: #a3aed0;
+            text-transform: uppercase;
+        }
+        .fee-table td {
+            padding: 15px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        /* Total Section */
+        .total-box {
+            margin-top: 30px;
+            background-color: #f4f7fe;
+            padding: 20px;
+            text-align: right;
+        }
+        .total-label {
+            font-size: 11px;
+            color: #a3aed0;
+            font-weight: bold;
+        }
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4318FF;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 11px;
+            color: #a3aed0;
+        }
+    </style>
+</head>
+<body>
+
+    <table class="header-table">
+        <tr>
+            <td>
+                <div class="logo">Arbor <span>Finance</span></div>
+                <div style="font-size: 11px; color: #a3aed0;">
+                    123 Education St, Knowledge City<br>
+                    contact@arborfinance.edu
+                </div>
+            </td>
+            <td style="text-align: right;">
+                <div class="paid-stamp">PAID</div>
+                <div class="receipt-title">OFFICIAL RECEIPT</div>
+                <div style="font-size: 11px; color: #a3aed0;">No: REC-{{ invoice.id|format('%05d') }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="info-table">
+        <tr>
+            <td>
+                <div class="label">Billed To</div>
+                <div class="value">
+                    {{ invoice.student.firstName }} {{ invoice.student.lastName }}
+                </div>
+                <div class="label">Admission Number</div>
+                <div class="value">{{ invoice.student.admissionNo }}</div>
+                <div class="label">Class</div>
+                <div class="value">{{ invoice.student.section.academicClass.name }}</div>
+            </td>
+            <td style="text-align: right;">
+                <div class="label">Payment Date</div>
+                <div class="value">{{ "now"|date('d M, Y') }}</div>
+                <div class="label">Status</div>
+                <div class="value" style="color: #05cd99;">Successful</div>
+                <div class="label">Method</div>
+                <div class="value">Online Bank Card</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="fee-table">
+        <thead>
+            <tr>
+                <th>Item Description</th>
+                <th style="text-align: right;">Amount Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong>{{ invoice.feeCategory.name }}</strong><br>
+                    <span style="font-size: 11px; color: #a3aed0;">Academic session 2025-2026</span>
+                </td>
+                <td style="text-align: right; font-weight: bold;">
+                    ${{ invoice.paidAmount|number_format(2) }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="total-box">
+        <div class="total-label">Total Amount (USD)</div>
+        <div class="total-amount">${{ invoice.paidAmount|number_format(2) }}</div>
+    </div>
+
+    <div class="footer">
+        <hr style="border: 0; border-top: 1px solid #eee; margin-bottom: 20px;">
+        <p>This is a computer-generated receipt. No physical signature is required.</p>
+        <p><strong>Thank you for your payment!</strong></p>
+    </div>
+
+</body>
+</html>

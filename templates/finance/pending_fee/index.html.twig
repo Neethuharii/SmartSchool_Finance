@@ -1,0 +1,68 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Pending Fees{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <h3 class="mb-4">Pending Fees</h3>
+
+    <div class="card p-4 shadow-sm">
+
+        <table class="table table-bordered table-striped">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Total</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            {% for inv in invoices %}
+
+                {% set balance = inv.totalAmount - inv.paidAmount %}
+
+                <tr>
+                    <td>{{ inv.id }}</td>
+                    <td>{{ inv.student.fullName }}</td>
+                    <td>₹{{ inv.totalAmount }}</td>
+                    <td>₹{{ inv.paidAmount }}</td>
+                    <td><strong>₹{{ balance }}</strong></td>
+                   
+
+                    <td>
+                        {% if inv.status == 'PENDING' %}
+                            <span class="badge bg-danger">Pending</span>
+                        {% elseif inv.status == 'PARTIAL' %}
+                            <span class="badge bg-warning text-dark">Partial</span>
+                        {% else %}
+                            <span class="badge bg-success">Paid</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+            {% else %}
+
+                <tr>
+                    <td colspan="7" class="text-center">No pending fees 🎉</td>
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

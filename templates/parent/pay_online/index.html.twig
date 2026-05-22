@@ -1,0 +1,543 @@
+
+
+{% block body %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+<style>
+    :root {
+        --primary: #4318FF;
+        --primary-soft: #f4f7fe;
+        --success: #11b981;
+        --text-main: #1c1c1c;
+        --text-secondary: #7d7c7a;
+        --card-bg: #ffffff;
+        --arbor-space-bg: #faf9f6; /* Nordic Minimalist Cream background */
+        --arbor-border: #e6e5e2;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: var(--arbor-space-bg) !important;
+        color: var(--text-main);
+        letter-spacing: -0.1px;
+    }
+
+    /* =========================
+        PAGE BACKGROUND
+    ========================== */
+    .page-wrapper {
+        min-height: 100vh;
+        background-color: var(--arbor-space-bg);
+        /* Subtle architectural gradient instead of a heavy image */
+        background-image: 
+            radial-gradient(at 80% 0%, rgba(67, 24, 255, 0.03) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(17, 185, 129, 0.02) 0px, transparent 50%);
+    }
+
+    /* =========================
+        NAVBAR
+    ========================== */
+    .navbar {
+        position: relative;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 40px;
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--arbor-border);
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .logo img {
+        width: 42px;
+    }
+
+    .logo h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .nav-links > a,
+    .dropdown-trigger {
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .nav-links > a:hover,
+    .dropdown-trigger:hover {
+        color: var(--primary);
+    }
+
+    /* DROPDOWN */
+    .nav-item-dropdown {
+        position: relative;
+    }
+
+    .dropdown-trigger {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .dropdown-trigger i {
+        font-size: 11px;
+        color: var(--text-secondary);
+        transition: transform 0.2s;
+    }
+
+    .nav-item-dropdown.active .dropdown-trigger i {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-content {
+        position: absolute;
+        top: 40px;
+        left: 0;
+        min-width: 220px;
+        background: var(--card-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        display: none;
+        border: 1px solid var(--arbor-border);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        animation: fadeIn 0.2s ease;
+    }
+
+    .dropdown-content.show {
+        display: block;
+    }
+
+    .dropdown-content a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .dropdown-content a:hover {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+
+    .logout-link {
+        border: 1px solid var(--arbor-border);
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 14px !important;
+    }
+
+    .logout-link:hover {
+        background: #fef2f2;
+        color: #dc2626 !important;
+        border-color: #fca5a5;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================
+        PAYMENT LAYOUT
+    ========================== */
+    .payment-layout {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 30px;
+        max-width: 1250px;
+        margin: 40px auto;
+        padding: 0 20px 60px;
+    }
+
+    /* LEFT SECTION */
+    .invoice-section {
+        background: var(--card-bg);
+        border: 1px solid var(--arbor-border);
+        border-radius: 16px;
+        padding: 35px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .section-header h3 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--text-main);
+    }
+
+    .text-secondary {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    /* TABLE */
+    .standard-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+    .standard-table th {
+        color: var(--text-secondary);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        padding: 0 15px;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .invoice-row {
+        background: var(--card-bg);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .invoice-row:hover {
+        transform: translateY(-1px);
+        box-shadow: 0px 4px 20px rgba(0,0,0,0.02);
+    }
+
+    .invoice-row td {
+        padding: 18px 15px;
+        border-top: 1px solid var(--arbor-border);
+        border-bottom: 1px solid var(--arbor-border);
+        color: var(--text-main);
+        font-size: 14px;
+    }
+
+    .invoice-row td:first-child {
+        border-left: 1px solid var(--arbor-border);
+        border-radius: 10px 0 0 10px;
+    }
+
+    .invoice-row td:last-child {
+        border-right: 1px solid var(--arbor-border);
+        border-radius: 0 10px 10px 0;
+    }
+
+    /* Custom Checkbox */
+    .fee-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 6px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fca5a5;
+    }
+
+    /* RIGHT SUMMARY CARD */
+    .summary-card {
+        background: var(--card-bg);
+        color: var(--text-main);
+        border: 1px solid var(--arbor-border);
+        border-radius: 16px;
+        padding: 35px;
+        position: sticky;
+        top: 40px;
+        height: fit-content;
+        box-shadow: 0px 10px 30px rgba(0,0,0,0.01);
+    }
+
+    .summary-card h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .summary-total {
+        border-top: 1px solid var(--arbor-border);
+        margin-top: 20px;
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-total span {
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .summary-total h2 {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: var(--text-main);
+    }
+
+    .btn-pay-now {
+        background: #1c1c1c;
+        color: #ffffff;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        margin-top: 25px;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .btn-pay-now:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* RESPONSIVE */
+    @media(max-width: 992px){
+        .payment-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media(max-width: 768px){
+        .navbar {
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+        }
+        .nav-links {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="page-wrapper">
+
+    <header class="navbar">
+        <div class="logo">
+            <img src="{{ asset('images/arborlogo-removebg-preview.png') }}" alt="Logo">
+            <h2>Arbor <span style="font-weight:300; color: var(--text-secondary);">Finance</span></h2>
+        </div>
+
+        <nav class="nav-links">
+            <a href="{{ path('parent_dashboard') }}">Overview</a>
+
+            <div class="nav-item-dropdown active">
+                <a class="dropdown-trigger">
+                    Payments <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-content show">
+                    <a href="{{ path('parent_pay_online') }}">
+                        <i class="fas fa-credit-card"></i> Pay Online
+                    </a>
+                </div>
+            </div>
+
+            <div class="nav-item-dropdown">
+                <a class="dropdown-trigger">
+                    Settings <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-content">
+                    <a href="{{ path('parent_profile') }}">
+                        <i class="fas fa-user"></i> Profile
+                    </a>
+                </div>
+            </div>
+
+            <a href="{{ path('app_logout') }}" class="logout-link">Logout</a>
+        </nav>
+    </header>
+
+    <div class="payment-layout">
+
+        <div class="invoice-section">
+            <div class="section-header">
+                <h3>Outstanding Fees</h3>
+                <span class="text-secondary">
+                    {{ invoices|length }} pending invoices
+                </span>
+            </div>
+
+            <form id="pay-form" action="{{ path('process_payment_gateway') }}" method="POST">
+                <table class="standard-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Select</th>
+                            <th>Fee Category</th>
+                            <th>Date</th>
+                            <th>Student</th>
+                            <th style="text-align:right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for invoice in invoices %}
+                        <tr class="invoice-row">
+                            <td>
+                                <input type="checkbox"
+                                       name="selected_invoices[]"
+                                       value="{{ invoice.id }}"
+                                       class="fee-checkbox"
+                                       data-amount="{{ invoice.balanceAmount }}"
+                                       checked>
+                            </td>
+                            <td>
+                                <strong style="font-weight: 700; color: var(--text-main);">
+                                    {{ invoice.feeCategory.name }}
+                                </strong>
+                                <br>
+                                <span class="status-badge">Unpaid</span>
+                            </td>
+                            <td class="text-secondary" style="font-variant-numeric: tabular-nums;">
+                                {{ invoice.createdAt|date('d M, Y') }}
+                            </td>
+                            <td>
+                                <strong style="font-weight: 600;">{{ invoice.student.firstName }}</strong>
+                            </td>
+                            <td style="text-align:right; font-weight: 700; font-variant-numeric: tabular-nums;">
+                                ${{ invoice.balanceAmount|number_format(2) }}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:60px; color: var(--text-secondary);">
+                                No pending payments found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+
+        <div class="summary-card">
+            <h3>Order Summary</h3>
+
+            <div class="summary-total">
+                <span>Total to Pay</span>
+                <h2 id="grand-total-text">${{ totalBalance|number_format(2) }}</h2>
+            </div>
+
+            <input type="hidden" name="final_amount" id="hidden-total" value="{{ totalBalance }}">
+
+            <button type="submit" class="btn-pay-now">Confirm and Pay</button>
+
+            <div style="text-align:center; margin-top:30px; opacity:0.7; font-size: 13px;">
+                <p style="margin-bottom:12px; color: var(--text-secondary); font-weight: 500;">
+                    Secure transaction powered by
+                </p>
+                <div style="display:flex; justify-content:center; gap:20px; font-size:24px; color: var(--text-main);">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-stripe"></i>
+                </div>
+            </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // =========================
+    // NAVBAR DROPDOWN
+    // =========================
+    const dropdowns = document.querySelectorAll('.nav-item-dropdown');
+
+    dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const menu = dropdown.querySelector('.dropdown-content');
+
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            dropdowns.forEach(otherDropdown => {
+                if (otherDropdown !== dropdown) {
+                    otherDropdown.classList.remove('active');
+                    otherDropdown.querySelector('.dropdown-content').classList.remove('show');
+                }
+            });
+
+            dropdown.classList.toggle('active');
+            menu.classList.toggle('show');
+        });
+    });
+
+    window.addEventListener('click', function () {
+        dropdowns.forEach(dropdown => {
+            dropdown.classList.remove('active');
+            dropdown.querySelector('.dropdown-content').classList.remove('show');
+        });
+    });
+
+    // =========================
+    // PAYMENT TOTAL
+    // =========================
+    const checkboxes = document.querySelectorAll('.fee-checkbox');
+    const grandTotalText = document.getElementById('grand-total-text');
+    const hiddenTotal = document.getElementById('hidden-total');
+
+    function updateSummary(){
+        let total = 0;
+        checkboxes.forEach(cb => {
+            if(cb.checked){
+                total += parseFloat(cb.dataset.amount);
+            }
+        });
+
+        grandTotalText.innerText = '$' + total.toLocaleString(undefined,{
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        });
+        hiddenTotal.value = total;
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateSummary);
+    });
+});
+</script>
+
+{% endblock %}

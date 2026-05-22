@@ -1,0 +1,261 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Official Receipt #{{ invoice.id }}{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --arbor-primary: #4318FF;
+        --arbor-primary-hover: #3311CC;
+        --arbor-secondary: #2b3674;
+        --arbor-success: #05cd99;
+        --arbor-light-bg: #F4F7FE;
+        --arbor-text-gray: #a3aed0;
+        --white: #ffffff;
+    }
+
+    body { background-color: var(--arbor-light-bg); font-family: 'Inter', 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+
+    /* ===================================
+       MODERN TOP NAVIGATION BAR
+    ==================================== */
+    .top-nav {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(224, 230, 242, 1);
+        padding: 15px 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .btn-nav-back {
+        color: var(--arbor-secondary);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        padding: 10px 16px;
+        border-radius: 12px;
+    }
+
+    .btn-nav-back:hover {
+        background: rgba(67, 24, 255, 0.05);
+        color: var(--arbor-primary);
+    }
+
+    .btn-action {
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-print {
+        background: var(--white);
+        color: var(--arbor-secondary);
+        border: 1px solid #E0E5F2;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-print:hover {
+        background: var(--arbor-secondary);
+        color: white;
+    }
+
+    .btn-download {
+        background: var(--arbor-primary);
+        color: white;
+        box-shadow: 0px 10px 20px rgba(67, 24, 255, 0.2);
+    }
+
+    .btn-download:hover {
+        background: var(--arbor-primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0px 12px 25px rgba(67, 24, 255, 0.3);
+    }
+
+    /* ===================================
+       RECEIPT DOCUMENT STYLES
+    ==================================== */
+    .receipt-container { padding: 60px 0; }
+
+    .receipt-paper {
+        background: var(--white);
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 80px;
+        position: relative;
+        box-shadow: 0px 40px 100px rgba(112, 144, 176, 0.15);
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    /* Top Branding Strip */
+    .receipt-paper::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 12px;
+        background: linear-gradient(90deg, var(--arbor-primary), #B399FF);
+    }
+
+    .watermark {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 120px;
+        font-weight: 900;
+        color: rgba(163, 174, 208, 0.03);
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .receipt-header { border-bottom: 1px solid #F4F7FE; padding-bottom: 40px; margin-bottom: 40px; position: relative; }
+
+    .school-brand h2 { font-size: 32px; color: var(--arbor-secondary); letter-spacing: -1px; margin: 0; }
+    .school-brand h2 span { color: var(--arbor-primary); font-weight: 300; }
+
+    .paid-badge {
+        background: rgba(5, 205, 153, 0.1);
+        border: 2px solid var(--arbor-success);
+        color: var(--arbor-success);
+        padding: 12px 30px;
+        font-weight: 800;
+        text-transform: uppercase;
+        border-radius: 16px;
+        font-size: 20px;
+        transform: rotate(-5deg);
+        display: inline-block;
+    }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-bottom: 60px; }
+    .info-label { color: var(--arbor-text-gray); font-size: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+    .info-value { color: var(--arbor-secondary); font-weight: 700; font-size: 16px; line-height: 1.4; }
+
+    .table-receipt { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+    .table-receipt th { border-bottom: 1px solid #F4F7FE; padding: 15px 0; text-align: left; color: var(--arbor-text-gray); font-size: 13px; text-transform: uppercase; font-weight: 700; }
+    .table-receipt td { padding: 30px 0; border-bottom: 1px solid #F4F7FE; }
+
+    .total-section { display: flex; justify-content: flex-end; }
+    .total-card {
+        background: var(--arbor-secondary);
+        border-radius: 20px;
+        padding: 30px 45px;
+        text-align: right;
+        min-width: 320px;
+        color: white;
+    }
+    .total-card p { margin: 0; font-size: 12px; text-transform: uppercase; opacity: 0.7; font-weight: 700; letter-spacing: 1px; }
+    .total-card h2 { margin: 5px 0 0; font-size: 40px; font-weight: 800; }
+
+    .receipt-footer { margin-top: 80px; padding-top: 40px; border-top: 1px solid #F4F7FE; }
+
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white; }
+        .receipt-container { padding: 0; }
+        .receipt-paper { box-shadow: none; width: 100%; padding: 40px; border-radius: 0; }
+        .receipt-paper::before { display: none; }
+    }
+</style>
+
+<nav class="top-nav no-print">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 210mm;">
+        <a href="{{ path('parent_dashboard') }}" class="btn-nav-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <div class="d-flex gap-3">
+            <button onclick="window.print()" class="btn-action btn-print">
+                <i class="fas fa-print"></i> Print
+            </button>
+         
+        </div>
+    </div>
+</nav>
+
+<div class="receipt-container">
+    <div class="receipt-paper">
+        <div class="watermark">ARBOR FINANCE</div>
+
+        <div class="receipt-header d-flex justify-content-between align-items-center">
+            <div class="school-brand">
+                <h2>Arbor <span>Finance</span></h2>
+                <p class="text-muted small mt-2">Official Institutional Receipt<br>ID: #{{ invoice.id|format('%05d') }}</p>
+            </div>
+            <div class="paid-badge">Paid</div>
+        </div>
+
+        <div class="info-grid">
+            <div>
+                <div class="info-label">Student Recipient</div>
+                <div class="info-value">
+                    {{ invoice.student.firstName }} {{ invoice.student.lastName }}<br>
+                    <span style="font-weight: 400; font-size: 14px; color: #707EAE;">
+                        Adm No: {{ invoice.student.admissionNo }}<br>
+                        Class: {{ invoice.student.section.academicClass.name }}
+                    </span>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="info-label">Transaction Summary</div>
+                <div class="info-value" style="color: var(--arbor-primary);">
+                    Reference: #REC-{{ invoice.id|format('%05d') }}<br>
+                    <span style="font-weight: 400; font-size: 14px; color: #707EAE;">
+                        Date: {{ "now"|date('d M, Y') }}<br>
+                        Channel: Online Gateway
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <table class="table-receipt">
+            <thead>
+                <tr>
+                    <th>Billing Description</th>
+                    <th class="text-end">Net Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="info-value">{{ invoice.feeCategory.name }}</div>
+                        <div class="text-muted small">Academic Term 2025-2026 • Electronic Settlement</div>
+                    </td>
+                    <td class="text-end fw-bold" style="font-size: 20px; color: var(--arbor-secondary);">
+                        ${{ invoice.paidAmount|number_format(2) }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <div class="total-card">
+                <p>Total Settled Amount</p>
+                <h2>${{ invoice.paidAmount|number_format(2) }}</h2>
+            </div>
+        </div>
+
+        <div class="receipt-footer text-center">
+            <p class="text-muted small mb-2">This is a digitally verified document issued by Arbor Finance.</p>
+            <h6 class="fw-bold" style="color: var(--arbor-secondary);">Thank you for your commitment to education.</h6>
+            
+            <div class="d-flex justify-content-center gap-5 mt-5 opacity-50">
+                <div class="small fw-bold"><i class="fas fa-shield-alt me-1"></i> Verified</div>
+                <div class="small fw-bold"><i class="fas fa-lock me-1"></i> Encrypted</div>
+                <div class="small fw-bold"><i class="fas fa-check-circle me-1"></i> Authenticated</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

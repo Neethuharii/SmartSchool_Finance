@@ -1,0 +1,515 @@
+{# templates/home.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbor Education</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Segoe UI',sans-serif;
+            color:#fff;
+            background:#ffffff;
+            overflow: hidden;
+        }
+
+        /* HERO */
+
+        .hero{
+            position:relative;
+            min-height:100vh;
+
+            background-image:url("{{ asset('images/grads1.JPG') }}");
+            background-size:cover;
+            background-position:center;
+            background-repeat:no-repeat;
+
+            display:flex;
+            flex-direction:column;
+        }
+
+        /* OVERLAY */
+
+     .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.35),
+        rgba(0,0,0,0.25)
+    );
+}
+
+        /* NAVBAR */
+
+        .navbar{
+            position:relative;
+            z-index:10;
+
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+
+            padding:24px 60px;
+        }
+
+        /* LOGO */
+
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .logo img{
+            width:48px;
+        }
+
+        .logo h2{
+            font-size:24px;
+            font-weight:600;
+        }
+
+        .logo span{
+            font-weight:300;
+        }
+
+        /* NAVIGATION */
+
+        .nav-links{
+            display:flex;
+            align-items:center;
+            gap:30px;
+        }
+
+        .nav-links > a,
+        .dropdown-trigger{
+            text-decoration:none;
+            color:#fff;
+
+            font-size:15px;
+            font-weight:500;
+
+            transition:0.3s;
+            cursor:pointer;
+        }
+
+        .nav-links > a:hover,
+        .dropdown-trigger:hover{
+            color:#e5e7eb;
+        }
+
+        /* DROPDOWN */
+
+        .nav-item-dropdown{
+            position:relative;
+        }
+
+        .dropdown-trigger{
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .dropdown-trigger i{
+            font-size:11px;
+        }
+
+        .dropdown-content{
+            position:absolute;
+            top:42px;
+            left:0;
+
+            width:210px;
+
+            background:#ffffff;
+            border-radius:14px;
+
+            overflow:hidden;
+
+            display:none;
+
+            box-shadow:0 12px 30px rgba(0,0,0,0.25);
+        }
+
+        .dropdown-content.show{
+            display:block;
+        }
+
+        .dropdown-content a{
+            display:flex;
+            align-items:center;
+            gap:10px;
+
+            padding:15px 18px;
+
+            color:#111827;
+            text-decoration:none;
+
+            transition:0.3s;
+        }
+
+        .dropdown-content a:hover{
+            background:#f3f4f6;
+        }
+
+        /* LOGOUT */
+
+        .logout-link{
+            padding:10px 20px;
+
+            border-radius:30px;
+
+            border:1px solid rgba(255,255,255,0.25);
+        }
+
+        .logout-link:hover{
+            background:#fff;
+            color:#111 !important;
+        }
+
+        /* CONTENT */
+
+        .hero-content{
+            position:relative;
+            z-index:5;
+
+            flex:1;
+            margin-bottom: -250px;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            padding:40px;
+        }
+
+        .content-box{
+            text-align:center;
+
+            max-width:750px;
+        }
+
+        .content-box h1{
+            font-size:78px;
+            font-weight:700;
+            line-height:1.1;
+
+            margin-bottom:20px;
+        }
+
+        .content-box p{
+            font-size:18px;
+            line-height:1.8;
+
+            color:rgba(255,255,255,0.85);
+
+            margin-bottom:35px;
+        }
+
+        /* BUTTONS */
+
+        .buttons{
+            display:flex;
+            justify-content:center;
+            gap:18px;
+            flex-wrap:wrap;
+        }
+
+        .btn{
+            text-decoration:none;
+
+            padding:14px 32px;
+
+            border-radius:8px;
+
+            font-weight:600;
+
+            transition:0.3s;
+        }
+
+        .btn-primary{
+            background:#ffffff;
+            color:#111827;
+        }
+
+        .btn-primary:hover{
+            background:#e5e7eb;
+        }
+
+        .btn-outline{
+            border:1px solid rgba(255,255,255,0.3);
+            color:#fff;
+        }
+
+        .btn-outline:hover{
+            background:#fff;
+            color:#111827;
+        }
+
+        /* BOTTOM INFO */
+
+        .bottom-bar{
+            position:relative;
+            z-index:5;
+
+            display:flex;
+            justify-content:center;
+            gap:40px;
+
+            padding:25px;
+
+            background:rgba(255,255,255,0.05);
+
+            backdrop-filter:blur(10px);
+        }
+
+        .info-item{
+            text-align:center;
+        }
+
+        .info-item h3{
+            font-size:28px;
+            margin-bottom:6px;
+        }
+
+        .info-item span{
+            font-size:14px;
+            color:#d1d5db;
+        }
+
+        /* RESPONSIVE */
+
+        @media(max-width:768px){
+
+            .navbar{
+                flex-direction:column;
+                gap:18px;
+
+                padding:20px;
+            }
+
+            .nav-links{
+                flex-wrap:wrap;
+                justify-content:center;
+            }
+
+            .content-box h1{
+                font-size:48px;
+            }
+
+            .content-box p{
+                font-size:16px;
+            }
+
+            .buttons{
+                flex-direction:column;
+                width:100%;
+                max-width:300px;
+                margin:auto;
+            }
+
+            .btn{
+                width:100%;
+                text-align:center;
+            }
+
+            .bottom-bar{
+                flex-direction:column;
+                gap:20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<section class="hero">
+
+    <!-- NAVBAR -->
+
+    <header class="navbar">
+
+        <div class="logo">
+
+            <img src="{{ asset('images/arborlogo-removebg-preview.png') }}" alt="Logo">
+
+            <h2>
+                Arbor
+                <span>Finance</span>
+            </h2>
+
+        </div>
+
+        <nav class="nav-links">
+
+            <a href="{{ path('parent_dashboard') }}">
+                Overview
+            </a>
+
+            <!-- PAYMENTS -->
+
+            <div class="nav-item-dropdown">
+
+                <a class="dropdown-trigger">
+                    Payments
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div class="dropdown-content">
+
+                    <a href="{{ path('parent_pay_online') }}">
+                        <i class="fas fa-credit-card"></i>
+                        Pay Online
+                    </a>
+
+                    
+
+                </div>
+
+            </div>
+
+            <!-- SETTINGS -->
+
+            <div class="nav-item-dropdown">
+
+                <a class="dropdown-trigger">
+                    Settings
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+
+                <div class="dropdown-content">
+
+                    <a href="{{ path('parent_profile') }}">
+                        <i class="fas fa-user"></i>
+                        Profile
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- LOGOUT -->
+
+            <a href="{{ path('app_logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </nav>
+
+    </header>
+
+    <!-- HERO CONTENT -->
+
+    <div class="hero-content">
+
+        <div class="content-box">
+
+            <h1>
+                Arbor Finance
+            </h1>
+
+            <p>
+                Manage school payments, invoices, and parent accounts
+                through a clean and secure educational finance platform.
+            </p>
+
+          {#  <div class="buttons">
+
+                <a href="{{ path('parent_pay_online') }}"
+                   class="btn btn-primary">
+                    Pay Fees
+                </a>
+
+                <a href="{{ path('parent_profile') }}"
+                   class="btn btn-outline">
+                    My Profile
+                </a>
+
+            </div>#}
+
+        </div>
+
+    </div>
+
+    <!-- FOOTER STATS -->
+
+   {# <div class="bottom-bar">
+
+        <div class="info-item">
+            <h3>100%</h3>
+            <span>Secure Payments</span>
+        </div>
+
+        <div class="info-item">
+            <h3>24/7</h3>
+            <span>Access Anytime</span>
+        </div>
+
+        <div class="info-item">
+            <h3>Easy</h3>
+            <span>Invoice Management</span>
+        </div>
+
+    </div>#}
+
+</section>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const dropdowns = document.querySelectorAll('.nav-item-dropdown');
+
+    dropdowns.forEach(dropdown => {
+
+        const trigger = dropdown.querySelector('.dropdown-trigger');
+        const menu = dropdown.querySelector('.dropdown-content');
+
+        trigger.addEventListener('click', function (e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+            dropdowns.forEach(otherDropdown => {
+                if (otherDropdown !== dropdown) {
+
+                    otherDropdown
+                        .querySelector('.dropdown-content')
+                        .classList.remove('show');
+                }
+            });
+
+            menu.classList.toggle('show');
+
+        });
+
+    });
+
+    window.addEventListener('click', function () {
+
+        dropdowns.forEach(dropdown => {
+
+            dropdown
+                .querySelector('.dropdown-content')
+                .classList.remove('show');
+        });
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

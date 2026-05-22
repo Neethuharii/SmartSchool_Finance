@@ -1,0 +1,80 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Fee Collection{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <h3 class="mb-4">Fee Collection</h3>
+
+    {% for msg in app.flashes('success') %}
+        <div class="alert alert-success">{{ msg }}</div>
+    {% endfor %}
+
+    {% for msg in app.flashes('error') %}
+        <div class="alert alert-danger">{{ msg }}</div>
+    {% endfor %}
+
+    
+    <div class="card p-4 shadow-sm mb-4">
+        <form method="POST">
+            <label class="mb-2">Select Student</label>
+
+            <select name="student_id" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Select Student --</option>
+
+                {% for s in students %}
+                    <option value="{{ s.id }}"
+                        {% if selectedStudent and selectedStudent.id == s.id %}selected{% endif %}>
+                        {{ s.fullName }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if invoices is not empty %}
+
+    
+        <div class="card p-4 shadow-sm">
+
+            <h5 class="mb-3">Invoices</h5>
+
+            <form method="POST">
+
+                <input type="hidden" name="student_id" value="{{ selectedStudent.id }}">
+
+                <div class="mb-3">
+                    <label>Select Invoice</label>
+
+                    <select name="invoice_id" class="form-control" required>
+                        {% for inv in invoices %}
+                            {% set balance = inv.totalAmount - inv.paidAmount %}
+
+                            <option value="{{ inv.id }}">
+                                Invoice #{{ inv.id }}
+                                | Total: ₹{{ inv.totalAmount }}
+                                | Paid: ₹{{ inv.paidAmount }}
+                                | Balance: ₹{{ balance }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Payment Amount</label>
+                    <input type="number" name="amount" class="form-control" min="1" required>
+                </div>
+
+                <button class="btn btn-success">Record Payment</button>
+
+            </form>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

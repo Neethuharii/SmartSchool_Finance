@@ -1,0 +1,145 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Academic Years | Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+    
+        .table-icon-btn {
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: 0.2s;
+            color: var(--text-muted);
+            background: #f4f7fe;
+            border: none;
+            text-decoration: none;
+        }
+        
+        .table-icon-btn:hover {
+            background: #e9e3ff;
+            color: #4318FF;
+            transform: translateY(-2px);
+        }
+
+        .badge-soft-secondary {
+            background: #f4f7fe;
+            color: #a3aed1;
+        }
+
+        
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            color: #e2e8f0;
+            margin-bottom: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--text-main);">Academic Years</h2>
+            <p class="text-muted mb-0">Manage school sessions, terms, and financial years.</p>
+        </div>
+        
+        <a href="{{ path('academic_year_new') }}" class="btn px-4 py-2 rounded-pill fw-bold text-white shadow-sm" style="background: var(--primary-grad); border: none; transition: 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-plus me-2"></i> Add Academic Year
+        </a>
+    </div>
+
+    <div class="card glass-card p-4">
+        <div class="table-responsive">
+            <table class="table custom-table table-borderless align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th width="8%">ID</th>
+                        <th width="30%">Session Name</th>
+                        <th width="20%">Start Date</th>
+                        <th width="20%">End Date</th>
+                        <th width="12%">Status</th>
+                        <th width="10%" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    {% for year in years %}
+                        <tr>
+                            <td class="text-muted fw-semibold">#{{ year.id|default('00') }}</td>
+                            
+                            <td>
+                                <div class="fw-bold text-dark" style="font-size: 1.05rem;">{{ year.name }}</div>
+                                {% if year.isActive %}
+                                    <small class="text-success"><i class="fas fa-check-circle me-1"></i>Current Session</small>
+                                {% endif %}
+                            </td>
+                            
+                            <td class="text-muted fw-medium">
+                                <i class="far fa-calendar-alt me-2 opacity-50"></i> 
+                                {{ year.startDate|date('d M Y') }}
+                            </td>
+                            
+                            <td class="text-muted fw-medium">
+                                <i class="far fa-calendar-check me-2 opacity-50"></i> 
+                                {{ year.endDate|date('d M Y') }}
+                            </td>
+                            
+                            <td>
+                                {% if year.isActive %}
+                                    <span class="status-badge badge-soft-success shadow-sm">
+                                        <i class="fas fa-circle me-1" style="font-size: 8px;"></i> Active
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge badge-soft-secondary">
+                                        Closed
+                                    </span>
+                                {% endif %}
+                            </td>
+                            
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="#" class="table-icon-btn" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="#" class="table-icon-btn text-danger" title="Delete" onmouseover="this.style.background='#feecea'" onmouseout="this.style.background='#f4f7fe'">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-calendar-times"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">No Academic Years Found</h5>
+                                    <p class="text-muted mb-4">You haven't set up any academic sessions yet. Create one to start managing fees and students.</p>
+                                    <a href="{{ path('academic_year_new') }}" class="btn btn-outline-primary rounded-pill px-4 fw-semibold">
+                                        Create First Year
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

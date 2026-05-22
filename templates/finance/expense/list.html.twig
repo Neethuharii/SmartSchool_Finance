@@ -1,0 +1,328 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Record Expense - ArborFinance{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --nordic-bg: #faf9f6;
+            --nordic-card: #ffffff;
+            --nordic-ink: #1c1c1c;
+            --nordic-muted: #7d7c7a;
+            --nordic-border: #e6e5e2;
+            --nordic-danger: #dc2626;
+        }
+
+        body {
+            background-color: var(--nordic-bg) !important;
+            color: var(--nordic-ink);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .nordic-card {
+            background: var(--nordic-card);
+            border: 1px solid var(--nordic-border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+        }
+
+        .form-control-nordic, .form-select-nordic {
+            border: 1px solid var(--nordic-border) !important;
+            background-color: var(--nordic-bg) !important;
+            color: var(--nordic-ink) !important;
+            border-radius: 8px !important;
+            padding: 12px !important;
+            font-size: 14px;
+        }
+
+        .form-control-nordic:focus, .form-select-nordic:focus {
+            border-color: var(--nordic-ink) !important;
+            box-shadow: none !important;
+            background-color: var(--nordic-card) !important;
+        }
+
+        .input-group-nordic-text {
+            background-color: var(--nordic-bg) !important;
+            border: 1px solid var(--nordic-border) !important;
+            border-right: none !important;
+            color: var(--nordic-muted);
+            border-radius: 8px 0 0 8px !important;
+            padding: 12px 16px;
+        }
+
+        .btn-nordic-dark {
+            background: var(--nordic-ink);
+            color: var(--nordic-bg);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .btn-nordic-dark:hover { opacity: 0.85; color: var(--nordic-bg); }
+
+        .btn-nordic-action {
+            background: transparent;
+            color: var(--nordic-ink);
+            border: 1px solid var(--nordic-border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn-nordic-action:hover {
+            background: var(--nordic-bg);
+            border-color: var(--nordic-ink);
+        }
+
+        /* COMPACT GRID TABLE */
+        .table-nordic { width: 100%; border-collapse: collapse; }
+        .table-nordic thead th {
+            color: var(--nordic-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--nordic-ink);
+            padding: 12px 8px;
+        }
+        .table-nordic tbody td {
+            padding: 18px 8px;
+            border-bottom: 1px solid var(--nordic-border);
+            font-size: 14px;
+        }
+
+        /* ===================================
+           CONTEXT RUNTIME PRINT SANDBOX
+        ==================================== */
+        .print-voucher-sandbox {
+            display: none;
+        }
+
+        @media print {
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            #arbor-screen-runtime {
+                display: none !important;
+            }
+            .print-voucher-sandbox {
+                display: block !important;
+            }
+            .voucher-sheet {
+                width: 100%;
+                max-width: 160mm;
+                margin: 0 auto;
+                padding: 15mm;
+                border: 1px solid #1c1c1c;
+                font-family: 'Courier New', Courier, monospace;
+                background: #fff;
+                color: #000;
+            }
+            .voucher-header {
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+            .voucher-meta-table {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .voucher-meta-table td {
+                padding: 5px 0;
+                font-size: 14px;
+            }
+            .voucher-amount-display {
+                border: 2px solid #000;
+                padding: 15px;
+                text-align: center;
+                font-size: 22px;
+                font-weight: bold;
+                margin: 20px 0;
+                letter-spacing: 1px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div id="arbor-screen-runtime">
+    <div class="container-fluid py-4 px-lg-4">
+        <div class="row g-4">
+            
+            {# --- LEFT COLUMN: EXPENSE LOGGER FORM --- #}
+            <div class="col-lg-4">
+                <div class="nordic-card">
+                    <h5 class="fw-bold mb-4 text-dark d-flex align-items-center">
+                        <i class="fas fa-file-invoice-dollar text-danger me-2 fs-5"></i>Record Outflow
+                    </h5>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted tracking-wider">Title / Description</label>
+                            <input type="text" name="title" class="form-control form-control-nordic" placeholder="e.g. Electricity Bill May" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted tracking-wider">Category Category</label>
+                            <select name="category" class="form-select form-select-nordic" required>
+                                <option value="Utilities">Utilities (Water, Electricity)</option>
+                                <option value="Maintenance">Maintenance & Repairs</option>
+                                <option value="Stationery">Stationery & Office Supplies</option>
+                                <option value="Salary">Staff Bonuses / Extra Pay</option>
+                                <option value="Other">Other Expenses</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted tracking-wider">Amount Due (USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text input-group-nordic-text">$</span>
+                                <input type="number" step="0.01" name="amount" class="form-control form-control-nordic text-danger fw-bold border-start-0" placeholder="0.00" style="border-radius: 0 8px 8px 0 !important;" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-nordic-dark w-100 py-3">
+                            Authorize Cash Outflow
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {# --- RIGHT COLUMN: HISTORICAL TRANSACTION DATA --- #}
+            <div class="col-lg-8">
+                <div class="nordic-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold m-0 text-dark">Recent Ledger Outflows</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-nordic align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Description Components</th>
+                                    <th>Classification</th>
+                                    <th>Log Date</th>
+                                    <th class="text-end">Value</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exp in recent_expenses %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-dark">{{ exp.title }}</div>
+                                            <small class="text-muted font-monospace" style="font-size: 11px;">#EXP-{{ exp.id }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border px-2 py-1 small rounded-3" style="font-weight:600; font-size:12px; border-color: var(--nordic-border) !important;">
+                                                {{ exp.category }}
+                                            </span>
+                                        </td>
+                                        <td class="small text-muted font-monospace">
+                                            {{ exp.createdAt|date('d M, Y') }}
+                                        </td>
+                                        <td class="text-end fw-bold text-danger">
+                                            -${{ exp.amount|number_format(2) }}
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn-nordic-action" onclick="dispatchVoucherPrint('voucher-src-{{ exp.id }}')">
+                                                <i class="fas fa-print me-1"></i> Voucher
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">No systemic operational expenses logged inside the active parameters.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# PRINT ROUTINE SANDBOX BUFFER CONTAINER #}
+<div class="print-voucher-sandbox" id="print-voucher-sandbox"></div>
+
+{# HIDDEN DATA ARTIFACT MAPPER: Automatically outputs clean receipts for print calls #}
+{% for exp in recent_expenses %}
+<div id="voucher-src-{{ exp.id }}" style="display:none;">
+    <div class="voucher-sheet">
+        <div class="voucher-header">
+            <h2 style="margin: 0 0 5px 0; font-weight: 900;">ARBOR FINANCE PLATFORM</h2>
+            <p style="margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Official Expense Disbursement Voucher</p>
+        </div>
+        
+        <table class="voucher-meta-table">
+            <tr>
+                <td style="width: 30%;"><strong>Voucher ID:</strong></td>
+                <td style="width: 70%;">#EXP-{{ exp.id }}</td>
+            </tr>
+            <tr>
+                <td><strong>Clearing Date:</strong></td>
+                <td>{{ exp.createdAt|date('d F, Y • H:i') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Classification:</strong></td>
+                <td>{{ exp.category }} Segment Allocation</td>
+            </tr>
+            <tr>
+                <td><strong>Description:</strong></td>
+                <td>{{ exp.title }}</td>
+            </tr>
+        </table>
+        
+        <div class="voucher-amount-display">
+            TOTAL DEBIT VALUE: USD ${{ exp.amount|number_format(2) }}
+        </div>
+        
+        <table style="width: 100%; margin-top: 50px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 50%; border-top: 1px dashed #000; text-align: center; padding-top: 8px; font-size: 12px;">
+                    Prepared / Logged By
+                </td>
+                <td style="width: 10%;"></td>
+                <td style="width: 50%; border-top: 1px dashed #000; text-align: center; padding-top: 8px; font-size: 12px;">
+                    Authorized Comptroller Signature
+                </td>
+            </tr>
+        </table>
+        
+        <p style="text-align: center; font-size: 11px; color: #333; margin-top: 40px; line-height: 1.4;">
+            This document acts as an explicit financial log verification tracking capital outflows on the system framework.<br>
+            <strong>SYSTEM TRANSACTION TOKEN VERIFIED</strong>
+        </p>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Reads targeted hidden element blocks, clones markup to sandbox, and executes hardware print routines
+        function dispatchVoucherPrint(sourceMarkupId) {
+            var inputStringSource = document.getElementById(sourceMarkupId).innerHTML;
+            var targetSandboxNode = document.getElementById('print-voucher-sandbox');
+            
+            // Populate sandboxed node structure
+            targetSandboxNode.innerHTML = inputStringSource;
+            
+            // Execute physical loop mechanics
+            window.print();
+            
+            // Flush buffer tree array structures clean immediately 
+            targetSandboxNode.innerHTML = "";
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}School Setup | Admin{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+        }
+
+       
+        .custom-input {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #2b3674;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .custom-input:focus {
+            background-color: #ffffff;
+            border-color: #868CFF;
+            box-shadow: 0 0 0 4px rgba(67, 24, 255, 0.1);
+            outline: none;
+        }
+
+        .custom-label {
+            font-weight: 600;
+            color: #2b3674;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+    
+        .custom-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+
+        .custom-switch .form-check-input:checked {
+            background-color: #05CD99;
+            border-color: #05CD99;
+        }
+
+        .custom-switch .form-check-label {
+            margin-left: 10px;
+            padding-top: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2b3674;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid py-4 px-lg-4">
+
+    <div class="mb-5">
+        <h2 class="fw-bold mb-1" style="color: #2b3674;">School Profile & Settings</h2>
+        <p class="text-muted mb-0">Configure your institution's core details and regional settings.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card glass-card p-4 p-md-5">
+                
+                <form method="POST" action="{{ path('school_setup_save') }}">
+                    
+                    <h5 class="fw-bold mb-4" style="color: #2b3674; border-bottom: 2px solid #f4f7fe; padding-bottom: 10px;">
+                        <i class="fas fa-school text-primary me-2"></i> General Information
+                    </h5>
+
+                    <div class="mb-4">
+                        <label class="custom-label">School Name</label>
+                        <input type="text" name="schoolName" class="form-control custom-input" 
+                               placeholder="Enter full school name" value="{{ school.schoolName ?? '' }}" required>
+                    </div>
+
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-6">
+                            <label class="custom-label"><i class="fas fa-phone-alt text-secondary me-2"></i> Phone Number</label>
+                            <input type="text" name="phone" class="form-control custom-input" 
+                                   placeholder="+1 234 567 8900" value="{{ school.phone ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-label"><i class="fas fa-envelope text-secondary me-2"></i> Email Address</label>
+                            <input type="email" name="email" class="form-control custom-input" 
+                                   placeholder="contact@school.edu" value="{{ school.email ?? '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="custom-label"><i class="fas fa-map-marker-alt text-secondary me-2"></i> Campus Address</label>
+                        <textarea name="address" class="form-control custom-input" rows="3" 
+                                  placeholder="Full street address, city, and zip code">{{ school.address ?? '' }}</textarea>
+                    </div>
+
+                    <h5 class="fw-bold mb-4" style="color: #2b3674; border-bottom: 2px solid #f4f7fe; padding-bottom: 10px;">
+                        <i class="fas fa-cogs text-primary me-2"></i> System Configuration
+                    </h5>
+
+                    <div class="row mb-4 g-3 align-items-center">
+                        <div class="col-md-6">
+                            <label class="custom-label"><i class="fas fa-coins text-secondary me-2"></i> Default Currency</label>
+                            <input type="text" name="currency" class="form-control custom-input" 
+                                   placeholder="e.g. USD, INR, EUR" value="{{ school.currency ?? 'INR' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mt-md-5">
+                            <div class="form-check form-switch custom-switch d-flex align-items-center p-0">
+                                <input class="form-check-input ms-0 mt-0" type="checkbox" role="switch" id="isActiveSwitch" name="isActive" 
+                                       {% if school and school.isActive %}checked{% endif %}>
+                                <label class="form-check-label" for="isActiveSwitch">
+                                    School Account is Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="mb-4 mt-5" style="border-color: #e2e8f0;">
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn px-5 py-2 rounded-pill fw-bold text-white shadow-sm" style="background: linear-gradient(135deg, #4318FF 0%, #868CFF 100%); border: none; transition: 0.3s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <i class="fas fa-save me-2"></i> Save Settings
+                        </button>
+                    </div>
+                    
+                </form>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="card glass-card p-4 bg-light border-0 sticky-top" style="top: 100px;">
+                
+                <div class="text-center mb-4">
+                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-building text-primary fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">{{ school.schoolName ?? 'Your Institution' }}</h5>
+                    <span class="badge {{ school and school.isActive ? 'bg-success' : 'bg-secondary' }} rounded-pill px-3">
+                        {{ school and school.isActive ? 'Active Status' : 'Inactive' }}
+                    </span>
+                </div>
+
+                <hr style="border-color: #e2e8f0;">
+
+                <h6 class="fw-bold mb-3" style="color: #2b3674;">
+                    <i class="fas fa-info-circle text-primary me-2"></i> Setup Guidelines
+                </h6>
+                <ul class="text-muted small ps-3 mb-0" style="line-height: 1.8;">
+                    <li><strong>School Name</strong> will appear on all printed fee receipts and invoices.</li>
+                    <li><strong>Currency</strong> dictates the format for all financial dashboards and reports.</li>
+                    <li>Disabling the <strong>Active Status</strong> will pause system access for non-admin users.</li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

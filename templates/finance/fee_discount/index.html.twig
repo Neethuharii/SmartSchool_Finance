@@ -1,0 +1,150 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Discounts & Waivers{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold text-dark m-0">Financial Adjustments Hub</h4>
+            <p class="text-muted small m-0">Manage global discount rules and assign them to specific students.</p>
+        </div>
+    </div>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show border-0 shadow-sm mb-4">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4">New Discount Rule</h5>
+                <form method="POST">
+                    <input type="hidden" name="action" value="create_rule">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Rule Name</label>
+                        <input type="text" name="name" class="form-control custom-input" placeholder="e.g. Sports Scholarship" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Type</label>
+                        <select name="type" class="form-select custom-input">
+                            <option value="percentage">Percentage (%)</option>
+                            <option value="fixed">Fixed Amount ($)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Value</label>
+                        <input type="number" step="0.01" name="value" class="form-control custom-input" placeholder="0.00" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase">Description</label>
+                        <textarea name="description" class="form-control custom-input" rows="2"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm" style="background: #4318FF; border:none;">
+                        Create Rule
+                    </button>
+                </form>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 bg-light">
+                <h5 class="fw-bold mb-3 text-primary">Assign to Student</h5>
+                <p class="text-muted small">Link a student to an existing rule.</p>
+                <form method="POST">
+                    <input type="hidden" name="action" value="assign_student">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Select Student</label>
+                        <select name="student_id" class="form-select custom-input" required>
+                            <option value="">Search Student...</option>
+                            {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.firstName }} {{ student.lastName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Select Rule</label>
+                        <select name="discount_id" class="form-select custom-input" required>
+                            {% for discount in discounts %}
+                                <option value="{{ discount.id }}">{{ discount.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-bold">
+                        Apply Waiver
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-4">Global Rules</h5>
+                <div class="row g-3">
+                    {% for discount in discounts %}
+                        <div class="col-md-6">
+                            <div class="p-3 border border-light rounded-4 bg-white hover-shadow transition-all d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold text-dark m-0">{{ discount.name }}</h6>
+                                    <span class="badge bg-soft-primary text-primary mt-1">
+                                        {{ discount.type == 'percentage' ? discount.value ~ '%' : '$' ~ discount.value|number_format(2) }} OFF
+                                    </span>
+                                </div>
+                                <form method="POST" action="{{ path('admin_fee_discount_delete', {'id': discount.id}) }}" onsubmit="return confirm('Delete this rule?');">
+                                    <button type="submit" class="btn btn-link text-danger p-0"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-4">Students with Active Waivers</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 small fw-bold">Student</th>
+                                <th class="small fw-bold">Waiver Applied</th>
+                                <th class="small fw-bold">Assigned Date</th>
+                                <th class="small fw-bold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assign in assignments %}
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-bold">{{ assign.student.firstName }} {{ assign.student.lastName }}</div>
+                                </td>
+                                <td><span class="text-primary fw-bold">{{ assign.discount.name }}</span></td>
+                                <td class="text-muted small">{{ assign.assignedAt|date('d M Y') }}</td>
+                                <td><span class="badge bg-success text-white px-2">Active</span></td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center py-4 text-muted small">No assignments yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary { background: rgba(67, 24, 255, 0.1); }
+    .custom-input { background: #f8f9fa; border: 2px solid #f1f3f5; border-radius: 10px; padding: 12px; transition: 0.3s; }
+    .custom-input:focus { background: #fff; border-color: #4318FF; box-shadow: none; }
+    .hover-shadow:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #4318FF !important; }
+    .transition-all { transition: all 0.3s ease; }
+</style>
+{% endblock %}

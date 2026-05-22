@@ -1,0 +1,67 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block body %}
+
+<div class="container py-4">
+
+    <h3 class="mb-4">Financial Report</h3>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6>Net Profit</h6>
+                <h4>
+                    ₹ {{ (monthlyRevenue|reduce((c,v)=>c+v)) - (monthlyExpenses|reduce((c,v)=>c+v)) }}
+                </h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6>Expense Ratio</h6>
+                <h4>{{ stats.expenseRatio }}</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h6>Collection Rate</h6>
+                <h4>{{ stats.collectionEfficiency }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <canvas id="chart"></canvas>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('chart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ labels|json_encode|raw }},
+        datasets: [
+            {
+                label: 'Revenue',
+                data: {{ monthlyRevenue|json_encode|raw }},
+                borderColor: 'blue',
+                fill: false
+            },
+            {
+                label: 'Expenses',
+                data: {{ monthlyExpenses|json_encode|raw }},
+                borderColor: 'red',
+                fill: false
+            }
+        ]
+    }
+});
+</script>
+
+{% endblock %}

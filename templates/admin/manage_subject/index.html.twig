@@ -1,0 +1,184 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Subjects & Syllabus - Admin Portal{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+            padding: 25px;
+        }
+        .subject-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            background: linear-gradient(135deg, #4318FF 0%, #868CFF 100%);
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: #f4f7fe;
+            color: #4318FF;
+            box-shadow: none;
+        }
+        .accordion-button:focus { box-shadow: none; border-color: rgba(0,0,0,.125); }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-0">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show shadow-sm" style="border-radius: 10px;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #2b3674;">Subjects & Syllabus</h2>
+            <p class="text-muted mb-0">Manage curriculum and lesson plans.</p>
+        </div>
+        <button class="btn px-4 py-2 text-white fw-bold" style="background: #4318FF; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+            <i class="fas fa-plus me-2"></i> Add Subject
+        </button>
+    </div>
+
+    <div class="row g-4">
+        {% for subject in subjects %}
+            <div class="col-md-6 col-xl-4">
+                <div class="glass-card h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="subject-icon shadow-sm"><i class="fas fa-book-open"></i></div>
+                            <div>
+                                <h5 class="fw-bold m-0" style="color: #2b3674;">{{ subject.name }}</h5>
+                                <span class="badge bg-light text-primary border mt-1">{{ subject.academicClass.name }}</span>
+                                {% if subject.subjectCode %}<span class="text-muted small ms-1">({{ subject.subjectCode }})</span>{% endif %}
+                            </div>
+                        </div>
+                        <form action="{{ path('admin_delete_subject', {'id': subject.id}) }}" method="POST" onsubmit="return confirm('Delete this subject and its syllabus?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_subject_' ~ subject.id) }}">
+                            <button type="submit" class="btn btn-sm text-danger border-0 bg-transparent"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </div>
+
+                  {#  <div class="accordion accordion-flush mt-3 mb-4 border rounded" id="accordionSyllabus{{ subject.id }}">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ subject.id }}">
+                                    View Syllabus ({{ subject.syllabuses|length }} Chapters)
+                                </button>
+                            </h2>
+                            <div id="collapse{{ subject.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSyllabus{{ subject.id }}">
+                                <div class="accordion-body p-0">
+                                    <ul class="list-group list-group-flush">
+                                        {% for chapter in subject.syllabuses %}
+                                            <li class="list-group-item">
+                                                <div class="fw-bold text-dark small">{{ chapter.chapterName }}</div>
+                                                {% if chapter.description %}<div class="text-muted small" style="font-size: 0.75rem;">{{ chapter.description }}</div>{% endif %}
+                                            </li>
+                                        {% else %}
+                                            <li class="list-group-item text-muted small italic text-center py-3">No chapters added yet.</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>#}
+
+                   {# <div class="mt-auto">
+                        <button class="btn btn-light w-100 fw-bold text-primary" style="border-radius: 10px;" onclick="openSyllabusModal('{{ subject.id }}', '{{ subject.name|e('js') }}')">
+                            <i class="fas fa-plus me-1"></i> Add Chapter
+                        </button>
+                    </div>#}
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="fas fa-book fs-1 mb-3" style="opacity: 0.3;"></i>
+                <h5 class="fw-bold">No subjects found</h5>
+                <p>Assign your first subject to a class.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="addSubjectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3 border-0" style="border-radius: 15px;">
+            <form action="{{ path('admin_manage_subjects') }}" method="POST">
+                <div class="modal-header border-0"><h5 class="fw-bold">Create New Subject</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body row g-3">
+                    <input type="hidden" name="add_subject" value="1">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_subject') }}">
+                    <div class="col-12">
+                        <label class="small fw-bold text-muted">Assign to Class <span class="text-danger">*</span></label>
+                        <select name="class_id" class="form-select bg-light border-0" required>
+                            <option value="">-- Select Class --</option>
+                            {% for class in classes %}<option value="{{ class.id }}">{{ class.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="small fw-bold text-muted">Subject Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control bg-light border-0" placeholder="e.g. Mathematics" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="small fw-bold text-muted">Code (Optional)</label>
+                        <input type="text" name="subject_code" class="form-control bg-light border-0" placeholder="e.g. MAT101">
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn text-white fw-bold w-100" style="background: #4318FF;">Save Subject</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addSyllabusModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3 border-0" style="border-radius: 15px;">
+            <form action="{{ path('admin_manage_subjects') }}" method="POST">
+                <div class="modal-header border-0">
+                    <h5 class="fw-bold">Add Chapter to <span id="display_subject_name" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body row g-3">
+                    <input type="hidden" name="add_syllabus" value="1">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_syllabus') }}">
+                    <input type="hidden" name="subject_id" id="modal_subject_id">
+                    <div class="col-12">
+                        <label class="small fw-bold text-muted">Chapter / Topic Title <span class="text-danger">*</span></label>
+                        <input type="text" name="chapter_name" class="form-control bg-light border-0" placeholder="e.g. Algebra I" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="small fw-bold text-muted">Description / Objectives</label>
+                        <textarea name="description" class="form-control bg-light border-0" rows="3" placeholder="What will the students learn?"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0"><button type="submit" class="btn text-white fw-bold w-100" style="background: #05CD99;">Save Chapter</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function openSyllabusModal(subjectId, subjectName) {
+            document.getElementById('modal_subject_id').value = subjectId;
+            document.getElementById('display_subject_name').innerText = subjectName;
+            new bootstrap.Modal(document.getElementById('addSyllabusModal')).show();
+        }
+    </script>
+{% endblock %}

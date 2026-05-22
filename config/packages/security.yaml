@@ -1,0 +1,68 @@
+security:
+    enable_authenticator_manager: true
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        
+    # 1. TELL SYMFONY TO LOOK IN YOUR DATABASE FOR USERS
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+            
+        main:
+            lazy: true
+            provider: app_user_provider
+
+            # 2. TURN ON THE LOGIN FORM AND POINT IT TO YOUR TRAFFIC COP
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_portal_hub 
+                enable_csrf: true
+
+            # 3. CONFIGURE LOGOUT
+            logout:
+                path: app_logout
+                target: app_login 
+
+    # =========================================================
+    # 4. ACCESS CONTROL (THE BOUNCER / LOCKS ON THE DOORS)
+    # =========================================================
+    # Note: Symfony reads these top-to-bottom. The first match wins!
+    access_control:
+        # Let everyone see the login and register pages
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: PUBLIC_ACCESS }
+        - { path: ^/teacher, roles: PUBLIC_ACCESS }
+        - { path: ^/finance, roles: PUBLIC_ACCESS }
+        - { path: ^/parent, roles: PUBLIC_ACCESS }
+        - { path: ^/portal, roles: PUBLIC_ACCESS }
+        
+        # --- THE FIX FOR YOUR FINANCE TEAM ---
+        # Allow Finance into URLs that start with /admin/finance
+        - { path: ^/admin/finance, roles: [ROLE_FINANCE, ROLE_ADMIN] }
+        
+        # Lock down the rest of the /admin area for true Admins only
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        
+        # Lock down the regular portals
+        - { path: ^/finance, roles: [ROLE_FINANCE, ROLE_ADMIN] }
+        - { path: ^/teacher, roles: ROLE_TEACHER }
+        - { path: ^/parent, roles: ROLE_PARENT }
+
+when@test:
+    security:
+        password_hashers:
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 
+                time_cost: 3 
+                memory_cost: 10

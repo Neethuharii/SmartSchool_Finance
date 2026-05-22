@@ -1,0 +1,131 @@
+
+
+{% block body %}
+
+<style>
+/* ... your existing success-page and success-card styles ... */
+.success-page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f6f7fb;
+    font-family:'Inter', sans-serif;
+}
+
+.success-card{
+    background:#fff;
+    padding:40px 30px;
+    border-radius:28px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.06);
+    text-align:center;
+    width:100%;
+    max-width:420px;
+}
+
+/* ✅ GPay STYLE ANIMATED ICON */
+.gpay-wrapper {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 25px;
+    position: relative;
+}
+
+.gpay-icon-svg {
+    width: 100px;
+    height: 100px;
+    display: block;
+}
+
+/* The Circle */
+.gpay-circle {
+    fill: none;
+    stroke: #34A853;
+    stroke-width: 4;
+    stroke-linecap: round;
+    animation: progress 0.6s ease-out forwards;
+}
+
+/* The Checkmark */
+.gpay-check {
+    fill: none;
+    stroke: #34A853;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    animation: checkmark 0.4s 0.5s ease-in-out forwards;
+}
+
+@keyframes progress {
+    0% { stroke-dasharray: 0 314; }
+    100% { stroke-dasharray: 314 314; }
+}
+
+@keyframes checkmark {
+    to { stroke-dashoffset: 0; }
+}
+
+/* ... your existing typography and button styles ... */
+.title{ font-size:24px; font-weight:700; color:#1f2a44; margin-bottom:8px; }
+.subtitle{ font-size:14px; color:#8a94a6; margin-bottom:25px; }
+.amount{ font-size:32px; font-weight:700; color:#1f2a44; margin-bottom:25px; }
+
+.details{ background:#f8fafc; border-radius:14px; padding:18px; text-align:left; font-size:14px; color:#555; margin-bottom:25px; border: 1px solid #edf2f7; }
+.row{ display:flex; justify-content:space-between; margin-bottom:8px; }
+.btn-primary{ display:block; width:100%; padding:16px; border-radius:16px; background:#4318FF; color:#fff; text-decoration:none; font-weight:700; transition:0.3s; margin-top:10px; }
+.btn-outline{ display:block; width:100%; padding:16px; border-radius:16px; border:2px solid #e2e8f0; color:#4318FF; text-decoration:none; font-weight:700; margin-bottom:12px; transition:0.3s; }
+.btn-outline:hover{ background:#f8fafc; border-color: #4318FF; }
+</style>
+
+<div class="success-page">
+    <div class="success-card">
+
+        <div class="gpay-wrapper">
+            <svg class="gpay-icon-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="46" style="stroke: #e6f4ea; stroke-width: 4; fill: none;"></circle>
+                <circle class="gpay-circle" cx="50" cy="50" r="46" transform="rotate(-90 50 50)"></circle>
+                <polyline class="gpay-check" points="30,52 44,65 70,38"></polyline>
+            </svg>
+        </div>
+
+        <div class="title">Payment Successful</div>
+        <div class="subtitle">Transaction completed successfully</div>
+
+        <div class="amount">
+            ${{ amount|number_format(2) }}
+        </div>
+
+        <div class="details">
+            <div class="row">
+                <span>Payment Status</span>
+                <strong style="color:#34a853;">Completed</strong>
+            </div>
+            <div class="row">
+                <span>Transaction Ref.</span>
+                <strong style="color: #1f2a44;">#{{ "now"|date('U') }}</strong>
+            </div>
+            <div class="row">
+                <span>Payment Time</span>
+                <strong style="color: #1f2a44;">{{ "now"|date('M d, H:i') }}</strong>
+            </div>
+        </div>
+
+        {% if invoiceId is defined %}
+            <a href="{{ path('parent_payment_receipt', {'id': invoiceId}) }}" class="btn-outline">
+                <i class="fas fa-file-download me-2"></i> View Receipt
+            </a>
+        {% endif %}
+
+        <a href="{{ path('parent_dashboard') }}" class="btn-primary">
+            Back to Dashboard
+        </a>
+
+        <div style="font-size: 12px; color: #9aa4b2; margin-top: 25px;">
+            <i class="fas fa-shield-alt me-1"></i> Secure payment by Arbor Finance
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'teacher/base.html.twig' %}
+
+{% block title %}Profile Settings - Arbor ERP{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        body { background-color: #f4f7fe; }
+        .profile-card { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); background: white; }
+        .avatar-circle { width: 100px; height: 100px; background: #4318FF; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border-radius: 50%; margin: 0 auto 15px; font-weight: 700; border: 5px solid #f4f7fe; }
+        .nav-pills .nav-link { color: #a3aed0; font-weight: 600; border-radius: 10px; padding: 12px 20px; }
+        .nav-pills .nav-link.active { background-color: #4318FF; color: white; }
+        .form-control { border-radius: 12px; padding: 12px; border: 1px solid #e2e8f0; background-color: #f8f9fc; }
+        .form-control:focus { box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.1); border-color: #4318FF; }
+        .hr-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #a3aed0; font-weight: 700; margin-bottom: 2px; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row g-4">
+        
+        {# Left Column: Profile Summary #}
+        <div class="col-lg-4">
+            <div class="card profile-card text-center p-4">
+                <div class="avatar-circle">
+                    {{ teacher.firstName|slice(0,1) }}{{ teacher.lastName|slice(0,1) }}
+                </div>
+                <h4 class="fw-bold text-dark mb-1">{{ teacher.firstName }} {{ teacher.lastName }}</h4>
+                <p class="text-muted small mb-3">{{ teacher.staffId }} | {{ teacher.status|upper }}</p>
+                
+                <hr class="my-4 opacity-50">
+                
+                <div class="text-start">
+                    <div class="mb-3">
+                        <p class="hr-label">Email Address</p>
+                        <p class="fw-bold text-dark">{{ teacher.user.email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <p class="hr-label">Official Role</p>
+                        <p class="fw-bold text-dark">Faculty / Teacher</p>
+                    </div>
+                    <div class="mb-3">
+                        <p class="hr-label">Join Date</p>
+                        <p class="fw-bold text-dark">{{ teacher.user.createdAt|date('d M, Y') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Right Column: Editable Settings #}
+        <div class="col-lg-8">
+            <div class="card profile-card p-4">
+                <h5 class="fw-bold text-dark mb-4">Account Settings</h5>
+                
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success rounded-3 small mb-4">{{ message }}</div>
+                {% endfor %}
+
+                <form method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">First Name (Read Only)</label>
+                            <input type="text" class="form-control" value="{{ teacher.firstName }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Last Name (Read Only)</label>
+                            <input type="text" class="form-control" value="{{ teacher.lastName }}" disabled>
+                        </div>
+                       {# <div class="col-md-12">
+                            <label class="form-label small fw-bold text-dark">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" value="{{ teacher.user.phone }}">
+                        </div>#}
+                        
+                        <hr class="my-4">
+                        
+                        <h6 class="fw-bold text-dark mb-2">Security Settings</h6>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-dark">Update Password</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Leave blank to keep current password">
+                            <div class="form-text small">Minimum 6 characters. Use a mix of letters and numbers.</div>
+                        </div>
+
+                        <div class="col-12 mt-4 text-end">
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

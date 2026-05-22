@@ -1,0 +1,158 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}System Settings{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        
+        .settings-wrapper {
+            background: #ffffff;
+            border: 1px solid #d1d5db; 
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .section-header {
+            background: #f8fafc;
+            padding: 12px 20px;
+            margin: -30px -30px 25px -30px; 
+            border-bottom: 1px solid #d1d5db;
+            border-radius: 12px 12px 0 0;
+        }
+
+      
+        .form-label {
+            font-weight: 700;
+            color: #334155;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #cbd5e1 !important; 
+            border-radius: 6px;
+            padding: 12px;
+            background-color: #ffffff;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: #4318FF !important;
+            background-color: #fcfdff;
+            box-shadow: none;
+            outline: none;
+        }
+
+     
+        .row-group {
+            margin-bottom: 40px;
+        }
+
+        .group-title {
+            color: #4318FF;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+
+        .group-title hr {
+            flex-grow: 1;
+            margin-left: 20px;
+            border-top: 2px solid #e2e8f0;
+            opacity: 1;
+        }
+
+        .btn-save-main {
+            background-color: #4318FF;
+            color: white;
+            padding: 12px 50px;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-3"> 
+    
+    <form method="POST" class="settings-wrapper">
+        
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <h4 class="m-0 fw-bold text-dark">Administrative & Financial Configuration</h4>
+            <div class="text-end">
+                <button type="submit" class="btn btn-save-main">
+                    <i class="fas fa-save me-2"></i> Save Configuration
+                </button>
+            </div>
+        </div>
+
+        <div class="row-group">
+            <div class="group-title">
+                <span><i class="fas fa-id-card me-2"></i> SCHOOL IDENTITY</span>
+                <hr>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <label class="form-label">School Official Name</label>
+                    <input type="text" name="school_name" class="form-control" value="{{ settings.schoolName }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Phone Contact</label>
+                    <input type="text" name="phone" class="form-control" value="{{ settings.phone }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email_from" class="form-control" value="{{ settings.emailFrom }}">
+                </div>
+              
+                <div class="col-md-12">
+                    <label class="form-label">Mailing/Billing Address</label>
+                    <textarea name="address" rows="3" class="form-control">{{ settings.address }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-group">
+            <div class="group-title">
+                <span><i class="fas fa-coins me-2"></i> FINANCIAL & BILLING RULES</span>
+                <hr>
+            </div>
+
+            <div class="row g-4">
+               
+                <div class="col-md-2">
+                    <label class="form-label">Tax Rate (%)</label>
+                    <input type="number" step="0.01" name="tax_percentage" class="form-control" value="{{ settings.taxPercentage }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Default Late Fee</label>
+                    <input type="number" step="0.01" name="late_fee" class="form-control" value="{{ settings.lateFeeAmount }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Invoice Number Prefix</label>
+                    <input type="text" name="invoice_prefix" class="form-control" value="{{ settings.invoicePrefix }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Receipt Number Prefix</label>
+                    <input type="text" name="receipt_prefix" class="form-control" value="{{ settings.receiptPrefix }}">
+                </div>
+            </div>
+        </div>
+
+        <div class="text-muted small mt-4 p-2 bg-light rounded text-center">
+            System Last Updated: <b>{{ settings.updatedAt ? settings.updatedAt|date('d M Y - H:i') : 'Initial Setup' }}</b>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

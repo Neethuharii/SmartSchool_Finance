@@ -1,0 +1,118 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}System Audit Logs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .audit-container {
+            background: #ffffff;
+            border: 2px solid #d1d5db; 
+            border-radius: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .table-audit {
+            width: 100%;
+            margin-bottom: 0;
+            border-collapse: collapse;
+        }
+
+        .table-audit th {
+            background-color: #f1f5f9;
+            color: #334155;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 15px;
+            border-bottom: 2px solid #cbd5e1;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .table-audit td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9;
+            font-size: 0.85rem;
+            color: #1e293b;
+            vertical-align: middle;
+        }
+
+        /* Action Badges */
+        .badge-status {
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            border: 1px solid transparent;
+        }
+        .action-create { background: #ecfdf5; color: #065f46; border-color: #10b981; }
+        .action-update { background: #fffbeb; color: #92400e; border-color: #f59e0b; }
+        .action-delete { background: #fef2f2; color: #991b1b; border-color: #ef4444; }
+        .action-login  { background: #eff6ff; color: #1e40af; border-color: #3b82f6; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-3">
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold text-dark m-0">System Activity Audit Log</h4>
+        <div class="text-muted small">Viewing last {{ logs|length }} activities</div>
+    </div>
+
+    <div class="audit-container shadow-sm">
+        <table class="table-audit">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Date & Time</th>
+                    <th style="width: 15%;">User</th>
+                    <th style="width: 10%;">Action</th>
+                    <th style="width: 15%;">Entity / ID</th>
+                    <th>Log Description</th>
+                    <th style="width: 12%;">IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="fw-bold text-secondary">
+                        {{ log.createdAt|date('Y-m-d H:i:s') }}
+                    </td>
+                    <td>
+                        <div class="fw-bold">{{ log.user ? log.user.email : 'System/Cron' }}</div>
+                    </td>
+                    <td>
+                        {% set actionClass = '' %}
+                        {% if 'CREATE' in log.action|upper %}{% set actionClass = 'action-create' %}
+                        {% elseif 'UPDATE' in log.action|upper %}{% set actionClass = 'action-update' %}
+                        {% elseif 'DELETE' in log.action|upper %}{% set actionClass = 'action-delete' %}
+                        {% else %}{% set actionClass = 'action-login' %}{% endif %}
+                        
+                        <span class="badge-status {{ actionClass }}">
+                            {{ log.action|upper }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-primary fw-bold">{{ log.entityName }}</span>
+                        <code class="ms-1">#{{ log.entityId }}</code>
+                    </td>
+                    <td>{{ log.description }}</td>
+                    <td>
+                        <span class="text-muted small">{{ log.ipAddress }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="fas fa-history mb-2 d-block fs-3"></i>
+                        No system activity recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'finance/base.html.twig' %}
+
+{% block title %}Open Banking Sync{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .bank-gradient { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .bg-soft-success { background: rgba(76, 175, 80, 0.1); color: #2e7d32; }
+        .bg-soft-warning { background: rgba(255, 152, 0, 0.1); color: #ef6c00; }
+        .bg-soft-danger { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+        
+        /* Scanning Animation */
+        .scan-line {
+            width: 100%; height: 2px; background: #0dcaf0;
+            position: absolute; top: 0; left: 0;
+            animation: scan 2s infinite linear;
+            box-shadow: 0 0 10px #0dcaf0;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        #syncOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div id="syncOverlay">
+    <div class="position-relative overflow-hidden rounded p-4 mb-3" style="width: 100px; height: 100px; background: #f8f9fc;">
+        <i class="fas fa-university fs-1 text-primary position-absolute top-50 start-50 translate-middle"></i>
+        <div class="scan-line"></div>
+    </div>
+    <h3 class="fw-bold text-dark">Establishing Secure Connection</h3>
+    <p class="text-muted" id="syncText">Authenticating via Open Banking API...</p>
+</div>
+
+<div class="container py-4" id="mainContent">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Live API Bank Feed</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mt-2 mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('finance_reconciliation_hub') }}" class="text-decoration-none">Reconciliation Hub</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Bank Sync</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <button onclick="startSync()" class="btn btn-dark shadow-sm rounded-pill px-4 fw-bold">
+            <i class="fas fa-sync-alt me-2"></i> Sync Latest Transactions
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4 bank-gradient">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                    <i class="fas fa-link fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-1">Connected: {{ bankName }}</h5>
+                    <div class="small opacity-75">
+                        <i class="fas fa-shield-alt me-1"></i> AES-256 Encrypted Open Banking Feed
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="small opacity-75 text-uppercase tracking-wide">Last Synced</div>
+                <div class="fw-bold fs-5" id="lastSyncTime">{{ lastSync|date('M d, Y h:i A') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center rounded-top-4">
+            <h5 class="fw-bold text-dark mb-0">Smart Match Ledger</h5>
+            <span class="badge bg-soft-success px-3 py-2 rounded-pill"><i class="fas fa-robot me-1"></i> Auto-Matching Active</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="bg-light text-muted small fw-bold">
+                    <tr>
+                        <th class="ps-4">BANK TRANSACTION (EXTERNAL)</th>
+                        <th>AMOUNT</th>
+                        <th>ARBOR SYSTEM RECORD (INTERNAL)</th>
+                        <th class="text-end pe-4">MATCH CONFIDENCE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="fw-bold text-dark">{{ txn.description }}</div>
+                                <small class="text-muted">Date: {{ txn.date }} | Ref: {{ txn.id }}</small>
+                            </td>
+                            <td class="fw-bold {{ txn.type == 'credit' ? 'text-success' : 'text-danger' }}">
+                                {{ txn.type == 'credit' ? '+' : '-' }}${{ txn.amount|abs|number_format(2) }}
+                            </td>
+                            <td>
+                                {% if txn.systemMatch %}
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-link text-success me-2"></i>
+                                        <span class="fw-bold text-dark">{{ txn.systemMatch }}</span>
+                                    </div>
+                                {% else %}
+                                    <div class="text-warning fw-bold">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Unmatched Transaction
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if txn.confidence > 90 %}
+                                    <span class="badge bg-soft-success px-3 rounded-pill border border-success">
+                                        {{ txn.confidence }}% Match <i class="fas fa-check-double ms-1"></i>
+                                    </span>
+                                {% else %}
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill fw-bold px-3">
+                                        Manual Match
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function startSync() {
+           
+            document.getElementById('syncOverlay').style.display = 'flex';
+            
+            // Sequence of fake loading text to make it look real
+            setTimeout(() => { document.getElementById('syncText').innerText = "Connecting to {{ bankName }} API..."; }, 800);
+            setTimeout(() => { document.getElementById('syncText').innerText = "Fetching new transactions..."; }, 1800);
+            setTimeout(() => { document.getElementById('syncText').innerText = "Running AI Auto-Match Algorithm..."; }, 2800);
+            
+            // Finish and reload the page
+            setTimeout(() => {
+                document.getElementById('syncOverlay').style.display = 'none';
+                
+                // Update the sync time dynamically
+                const now = new Date();
+                document.getElementById('lastSyncTime').innerText = now.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+            }, 4000);
+        }
+    </script>
+{% endblock %}

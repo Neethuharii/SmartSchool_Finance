@@ -1,0 +1,339 @@
+{% extends 'admin/dashboard/index.html.twig' %}
+
+{% block title %}Manage Parents - Admin Portal{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .glass-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(112, 144, 176, 0.08);
+            padding: 25px;
+        }
+        
+        .custom-table th {
+            color: #a3aed1;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #f4f7fe;
+            padding-bottom: 15px;
+        }
+        
+        .custom-table td {
+            padding: 15px 10px;
+            border-bottom: 1px dashed #e2e8f0;
+            color: #2b3674;
+            vertical-align: middle;
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .action-icon {
+            color: #a3aed1;
+            transition: 0.2s;
+            margin: 0 5px;
+            font-size: 1.1rem;
+        }
+        
+        .action-icon:hover {
+            color: #4318FF;
+            transform: scale(1.1);
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .dot-active { background-color: #05CD99; }
+        .dot-inactive { background-color: #EE5D50; }
+        
+        .modal-content { border-radius: 15px; border: none; }
+
+        
+        .dropdown-check-list {
+            display: inline-block;
+            width: 100%;
+        }
+        .dropdown-check-list .anchor {
+            position: relative;
+            cursor: pointer;
+            display: block;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            color: #2b3674;
+            font-weight: 600;
+        }
+        .dropdown-check-list .anchor:after {
+            position: absolute;
+            content: "";
+            border-left: 2px solid #2b3674;
+            border-top: 2px solid #2b3674;
+            padding: 3px;
+            right: 15px;
+            top: 40%;
+            transform: rotate(-135deg);
+        }
+        .dropdown-check-list .items {
+            padding: 10px;
+            display: none;
+            margin: 0;
+            border: 1px solid #f4f7fe;
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .dropdown-check-list.visible .items {
+            display: block;
+        }
+        .dropdown-check-list .items li {
+            list-style: none;
+            padding: 5px 0;
+            font-size: 0.9rem;
+        }
+        .dropdown-check-list input {
+            margin-right: 10px;
+            accent-color: #4318FF;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid p-0">
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold" style="color: #2b3674;">Manage Parents</h2>
+        <button class="btn text-white fw-bold px-4" style="background: #4318FF; border-radius: 12px;" data-bs-toggle="modal" data-bs-target="#addParentModal">
+            <i class="fas fa-plus me-2"></i> Add Parent
+        </button>
+    </div>
+
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table custom-table table-borderless align-middle">
+                <thead>
+                    <tr>
+                        <th>Parent</th>
+                        <th>Contact</th>
+                        <th>Children</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parent in parents %}
+                        {# Extract IDs of students linked to this parent #}
+                        {% set linkedIds = [] %}
+                        {% for student in students %}
+                            {% if student.parentUser and student.parentUser.id == parent.id %}
+                                {% set linkedIds = linkedIds|merge([student.id]) %}
+                            {% endif %}
+                        {% endfor %}
+
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">{{ parent.name }}</div>
+                            </td>
+                            <td class="text-muted small">{{ parent.email }}<br>{{ parent.phone }}</td>
+                            <td>
+                                {% set found = false %}
+                                {% for student in students %}
+                                    {% if student.parentUser and student.parentUser.id == parent.id %}
+                                        <span class="badge bg-light text-primary border me-1">{{ student.firstName }}</span>
+                                        {% set found = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if not found %}<span class="text-muted small italic">None linked</span>{% endif %}
+                            </td>
+                            <td>
+                                <span class="status-dot {{ parent.status == 'active' ? 'dot-active' : 'dot-inactive' }}"></span>
+                                <span class="fw-bold">{{ parent.status|capitalize }}</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm text-primary action-icon border-0 bg-transparent" 
+                                    onclick="openEditModal('{{ parent.id }}', '{{ parent.firstName|e('js') }}', '{{ parent.lastName|e('js') }}', '{{ parent.email|e('js') }}', '{{ parent.phone|e('js') }}', '{{ parent.status|e('js') }}', {{ linkedIds|json_encode }})">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <form action="{{ path('admin_delete_parent', {id: parent.id}) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete_parent_' ~ parent.id) }}">
+                                    <button class="btn btn-sm text-danger action-icon border-0 bg-transparent"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addParentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content p-3">
+            <form action="{{ path('admin_manage_parents') }}" method="POST">
+                <div class="modal-header border-0"><h5 class="fw-bold">New Parent Account</h5></div>
+                <div class="modal-body row g-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('add_parent') }}">
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">First Name</label>
+                        <input type="text" name="first_name" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Last Name</label>
+                        <input type="text" name="last_name" class="form-control bg-light border-0" required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="small fw-bold text-muted">Select Child / Students</label>
+                        <div id="list1" class="dropdown-check-list">
+                            <span class="anchor">Click to select students...</span>
+                            <ul class="items">
+                                {% for student in students %}
+                                    <li><input type="checkbox" name="student_ids[]" value="{{ student.id }}" />{{ student.firstName }} {{ student.lastName }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Email</label>
+                        <input type="email" name="email" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Phone</label>
+                        <input type="text" name="phone" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Password</label>
+                        <input type="password" name="password" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Status</label>
+                        <select name="status" class="form-select bg-light border-0">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn text-white px-4 fw-bold" style="background: #4318FF;">Save Parent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editParentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content p-3">
+            <form id="editParentForm" method="POST">
+                <div class="modal-header border-0"><h5 class="fw-bold">Edit Parent</h5></div>
+                <div class="modal-body row g-3">
+                    <input type="hidden" name="_token" id="edit_csrf_token">
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">First Name</label>
+                        <input type="text" name="first_name" id="edit_first_name" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Last Name</label>
+                        <input type="text" name="last_name" id="edit_last_name" class="form-control bg-light border-0" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="small fw-bold text-muted">Linked Students</label>
+                        <div id="list2" class="dropdown-check-list">
+                            <span class="anchor">Update student links...</span>
+                            <ul class="items">
+                                {% for student in students %}
+                                    <li><input type="checkbox" name="student_ids[]" value="{{ student.id }}" class="edit-student-checkbox" />{{ student.firstName }} {{ student.lastName }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Email</label>
+                        <input type="email" name="email" id="edit_email" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-bold text-muted">Phone</label>
+                        <input type="text" name="phone" id="edit_phone" class="form-control bg-light border-0" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="small fw-bold text-muted">Status</label>
+                        <select name="status" id="edit_status" class="form-select bg-light border-0">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn text-white px-4 fw-bold" style="background: #4318FF;">Update Parent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Toggle the dropdown checklist
+        document.querySelectorAll('.dropdown-check-list .anchor').forEach(item => {
+            item.onclick = function(evt) {
+                item.parentElement.classList.toggle('visible');
+            }
+        });
+
+        function openEditModal(id, firstName, lastName, email, phone, status, linkedIds) {
+            document.getElementById('edit_first_name').value = firstName;
+            document.getElementById('edit_last_name').value = lastName;
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_phone').value = phone;
+            document.getElementById('edit_status').value = status;
+            
+            // Check the checkboxes for linked students
+            document.querySelectorAll('.edit-student-checkbox').forEach(checkbox => {
+                checkbox.checked = linkedIds.includes(parseInt(checkbox.value));
+            });
+
+            let formAction = "{{ path('admin_edit_parent', {id: 'ID'}) }}".replace('ID', id);
+            document.getElementById('editParentForm').action = formAction;
+
+            let tokens = { {% for parent in parents %}"{{ parent.id }}": "{{ csrf_token('edit_parent_' ~ parent.id) }}"{% if not loop.last %},{% endif %}{% endfor %} };
+            document.getElementById('edit_csrf_token').value = tokens[id];
+
+            new bootstrap.Modal(document.getElementById('editParentModal')).show();
+        }
+    </script>
+{% endblock %}

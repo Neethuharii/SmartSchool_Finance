@@ -1,0 +1,379 @@
+{% extends 'teacher/base.html.twig' %}
+
+{% block title %}Tax Statement {{ year }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+
+<style>
+    body{
+        background:#eef2f7;
+        font-family:'Segoe UI',sans-serif;
+    }
+
+    .statement-wrapper{
+        max-width:1000px;
+        margin:auto;
+    }
+
+    .statement-card{
+        background:#fff;
+        border-radius:12px;
+        overflow:hidden;
+        box-shadow:0 6px 24px rgba(0,0,0,0.06);
+        border:1px solid #dbe3ef;
+    }
+
+    .statement-header{
+        background:#1e3a5f;
+        color:#fff;
+        padding:35px 40px;
+    }
+
+    .statement-header h1{
+        font-size:32px;
+        font-weight:700;
+        margin-bottom:5px;
+    }
+
+    .statement-header p{
+        margin:0;
+        opacity:.85;
+    }
+
+    .statement-body{
+        padding:40px;
+    }
+
+    .section-title{
+        font-size:14px;
+        text-transform:uppercase;
+        letter-spacing:1px;
+        font-weight:700;
+        color:#64748b;
+        margin-bottom:18px;
+    }
+
+    .info-table td{
+        padding:8px 0;
+        font-size:15px;
+    }
+
+    .info-table td:first-child{
+        color:#64748b;
+        width:180px;
+    }
+
+    .summary-table{
+        width:100%;
+        border-collapse:collapse;
+        margin-top:20px;
+    }
+
+    .summary-table thead{
+        background:#f8fafc;
+    }
+
+    .summary-table th{
+        padding:14px;
+        font-size:13px;
+        text-transform:uppercase;
+        color:#475569;
+        border-bottom:1px solid #e2e8f0;
+    }
+
+    .summary-table td{
+        padding:16px 14px;
+        border-bottom:1px solid #edf2f7;
+        font-size:15px;
+    }
+
+    .summary-table tfoot td{
+        font-weight:700;
+        background:#f8fafc;
+    }
+
+    .amount-positive{
+        color:#15803d;
+        font-weight:700;
+    }
+
+    .amount-negative{
+        color:#dc2626;
+        font-weight:700;
+    }
+
+    .net-box{
+        background:#f1f5f9;
+        border-radius:10px;
+        padding:25px;
+        margin-top:30px;
+    }
+
+    .net-box h2{
+        margin:0;
+        font-size:36px;
+        font-weight:800;
+        color:#0f172a;
+    }
+
+    .signature-area{
+        margin-top:70px;
+    }
+
+    .signature-line{
+        border-top:1px solid #111;
+        width:220px;
+        margin-top:50px;
+        padding-top:8px;
+        text-align:center;
+        font-size:14px;
+        font-weight:600;
+    }
+
+    .print-btn{
+        border-radius:8px;
+        padding:10px 24px;
+        font-weight:600;
+    }
+
+    @media print{
+        .no-print{
+            display:none;
+        }
+
+        body{
+            background:#fff;
+        }
+
+        .statement-card{
+            box-shadow:none;
+            border:none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container py-5 statement-wrapper">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h3 class="fw-bold mb-1">Annual Tax Statement</h3>
+            <p class="text-muted mb-0">
+                Financial Year {{ year }}
+            </p>
+        </div>
+
+        <button onclick="window.print()" class="btn btn-primary print-btn">
+            <i class="fas fa-print me-2"></i>
+            Print Statement
+        </button>
+    </div>
+
+    <div class="statement-card">
+
+        <div class="statement-header d-flex justify-content-between align-items-start">
+
+            <div>
+                <h1>ARBOR FINANCE</h1>
+                <p>Official Employee Tax & Earnings Statement</p>
+            </div>
+
+            <div class="text-end">
+                <div class="fw-bold fs-5">
+                    FY {{ year }}
+                </div>
+
+                <small>
+                    Generated on {{ "now"|date("d M Y") }}
+                </small>
+            </div>
+
+        </div>
+
+        <div class="statement-body">
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <div class="section-title">
+                        Employee Information
+                    </div>
+
+                    <table class="info-table">
+                        <tr>
+                            <td>Employee Name</td>
+                            <td>
+                                <strong>
+                                    {{ teacher.firstName }} {{ teacher.lastName }}
+                                </strong>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Staff ID</td>
+                            <td>{{ teacher.staffId }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Email</td>
+                            <td>{{ teacher.user.email }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Department</td>
+                            <td>Academic Faculty</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="section-title">
+                        Statement Information
+                    </div>
+
+                    <table class="info-table">
+                        <tr>
+                            <td>Financial Year</td>
+                            <td>{{ year }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Period Covered</td>
+                            <td>01 Jan {{ year }} - 31 Dec {{ year }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Statement Type</td>
+                            <td>Annual Tax Summary</td>
+                        </tr>
+
+                        <tr>
+                            <td>Status</td>
+                            <td>
+                                <span class="badge bg-success">
+                                    Verified
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+            </div>
+
+            <div class="mt-5">
+
+                <div class="section-title">
+                    Earnings & Deductions Summary
+                </div>
+
+                <table class="summary-table">
+
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Total Gross Earnings</td>
+                            <td class="text-end amount-positive">
+                                ${{ totalGross|number_format(2) }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Tax Deducted</td>
+                            <td class="text-end amount-negative">
+                                -${{ totalDeductions|number_format(2) }}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Insurance Contributions</td>
+                            <td class="text-end">
+                                $0.00
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Other Deductions</td>
+                            <td class="text-end">
+                                $0.00
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td>Net Taxable Income</td>
+                            <td class="text-end">
+                                ${{ totalNet|number_format(2) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+            <div class="net-box d-flex justify-content-between align-items-center">
+
+                <div>
+                    <small class="text-uppercase text-muted fw-bold">
+                        Annual Net Income
+                    </small>
+
+                    <h2>
+                        ${{ totalNet|number_format(2) }}
+                    </h2>
+                </div>
+
+                <div class="text-end">
+                    <small class="text-muted d-block">
+                        Tax Compliance Status
+                    </small>
+
+                    <span class="badge bg-success px-3 py-2">
+                        Cleared
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="signature-area d-flex justify-content-between align-items-end">
+
+                <div>
+                    <p class="text-muted small mb-0">
+                        This statement is electronically generated by Arbor ERP Finance System.
+                    </p>
+
+                    <p class="text-muted small">
+                        No manual signature is required.
+                    </p>
+                </div>
+
+                <div class="signature-line">
+                    Finance Administrator
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
