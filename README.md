@@ -33,44 +33,26 @@ ArborFinance is a web-based financial management portal designed specifically fo
 * Real-time visualization of financial data.
 * Monitor cash flow trends.
 * Analyze profit margins and financial performance.
-* Support data-driven decision-making for administrators.
+
 
 ## Technology Stack
 
 * **Backend:** Symfony (PHP Framework)
 * **Frontend:** HTML, CSS, JavaScript, Bootstrap
 * **Database:** MySQL
-* **Reporting:** PDF and Printable Reports
-* **Dashboard Analytics:** Real-time charts and financial metrics
 
 ## Benefits
 
 * Reduces manual paperwork and administrative workload.
 * Minimizes accounting and data-entry errors.
 * Provides accurate and up-to-date financial records.
-* Saves time through workflow automation.
-* Enhances financial visibility and decision-making.
-
-## Installation
 
 ### Prerequisites
 
 * PHP 8.0+
 * Composer
 * MySQ
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/arborfinance.git
-cd arborfinance
-```
-
-### Install Dependencies
-
-```bash
-composer install
-```
+* Symfony CLI
 
 
 ## Future Enhancements
@@ -81,6 +63,3 @@ composer install
 * Multi-campus financial management
 * Export reports to Excel and PDF
 
-## Contributing
-
-Contributions are welcome. Please fork the repository, create a feature branch, and submit a pull request.
