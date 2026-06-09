@@ -1,7 +1,8 @@
 # environment files
 .env
 .env.dev
-
+# NetBeans
+nbproject/
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
